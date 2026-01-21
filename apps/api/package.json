@@ -1,0 +1,34 @@
+{
+  "name": "api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "db:up": "docker compose up -d",
+    "db:stop": "docker compose stop",
+    "db:generate:migration": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:studio": "drizzle-kit studio",
+    "open-auth-docs": "open-cli http://localhost:3000/api/auth/reference"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.6",
+    "@low-seven/shared": "workspace:*",
+    "better-auth": "^1.4.15",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "drizzle-seed": "^0.3.1",
+    "hono": "^4.11.4",
+    "nanoid": "^5.1.6",
+    "pg": "^8.17.1",
+    "stripe": "^20.2.0",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.31.8",
+    "open-cli": "^8.0.0",
+    "tsx": "^4.21.0"
+  }
+}
