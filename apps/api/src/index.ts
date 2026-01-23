@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { auth } from './lib/auth'
 import activitiesRoute from './routes/activities'
 import packagesRoute from './routes/packages'
@@ -9,8 +10,18 @@ import guidesRoute from './routes/guides'
 
 const app = new Hono()
 
+// CORS middleware - must be before routes
+app.use('*', cors({
+  origin: ['http://localhost:3001', 'http://localhost:3000'],
+  credentials: true,
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+}))
+
 app
-.on(['POST', 'GET'], '/api/auth/**', (c) => auth.handler(c.req.raw))
+.all('/api/auth/*', async (c) => {
+  return await auth.handler(c.req.raw)
+})
 .route('/api/webhooks', paymentsRoute) // Webhook routes (no auth)
 .route('/api/activities', activitiesRoute)
 .route('/api/packages', packagesRoute)

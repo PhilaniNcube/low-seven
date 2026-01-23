@@ -4,8 +4,7 @@ import {betterAuth} from 'better-auth';
 import { openAPI } from 'better-auth/plugins';
 import type { Context } from 'hono';
 import { adminUser } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
-import type { User, Session } from '@low-seven/shared/auth';
+import { and, eq } from 'drizzle-orm';
 
 export const auth = betterAuth({
     emailAndPassword: {
@@ -14,6 +13,7 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+  trustedOrigins: ['http://localhost:3001', 'http://localhost:3000'],
   plugins: [
     openAPI()
   ],
