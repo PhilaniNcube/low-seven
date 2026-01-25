@@ -62,7 +62,7 @@ export function Destinations() {
           {destinations.map((destination) => (
             <div
               key={destination.name}
-              className="group relative overflow-hidden rounded-2xl aspect-4/5 cursor-pointer"
+              className="group relative overflow-hidden rounded-2xl aspect-5/4 cursor-pointer"
             >
               <Image
                 src={destination.image || "/placeholder.svg"}

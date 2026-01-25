@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bun run --hot src/index.ts",
+    "dev": "bun run --hot --port 3000 src/index.ts",
     "db:up": "docker compose up -d",
     "db:stop": "docker compose stop",
     "db:generate:migration": "drizzle-kit generate",
