@@ -46,6 +46,8 @@ export const requireAdmin = async (c: Context, next: () => Promise<void>) => {
       headers: c.req.raw.headers 
     });
 
+    console.log('Session in requireAdmin middleware:', session);
+
     // Check if user is authenticated
     if (!session || !session.user) {
       return c.json({ error: 'Unauthorized - Please login' }, 401);

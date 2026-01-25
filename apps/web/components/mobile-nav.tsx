@@ -28,7 +28,7 @@ export function MobileNav() {
           <Menu className="h-6 w-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[85vw] sm:w-[400px] p-0">
+      <SheetContent side="left" className="w-[85vw] sm:w-100 p-0">
         <SheetHeader className="border-b px-6 py-4">
           <SheetTitle>Menu</SheetTitle>
         </SheetHeader>
