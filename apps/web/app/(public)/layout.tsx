@@ -1,5 +1,6 @@
 
 import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import { Geist, Geist_Mono, Nunito_Sans } from "next/font/google";
 
 const nunitoSans = Nunito_Sans({variable:'--font-sans'});
@@ -28,6 +29,7 @@ export default function RootLayout({
       >
        <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );
