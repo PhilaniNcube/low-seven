@@ -7,7 +7,7 @@
       "outputs": []
     },
     "api#build": {
-      "outputs": ["dist/**"]
+      "outputs": ["api/index.js"]
     },
     "web#build": {
       "dependsOn": ["^build"],

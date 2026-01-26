@@ -1,16 +1,8 @@
 {
-  "version": 2,
-  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/index"
+      "destination": "/api/index"
     }
-  ],
-  "functions": {
-    "dist/**/*.js": {
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  }
+  ]
 }
