@@ -6,6 +6,10 @@
       "dependsOn": ["^build"],
       "outputs": []
     },
+    "@low-seven/shared#build": {
+      "cache": false,
+      "outputs": []
+    },
     "web#build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
