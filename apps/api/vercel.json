@@ -1,11 +1,4 @@
 {
-  "functions": {
-    "api/**/*.ts": {
-      "includeFiles": "src/**",
-      "memory": 1024,
-      "maxDuration": 10
-    }
-  },
   "rewrites": [
     {
       "source": "/(.*)",

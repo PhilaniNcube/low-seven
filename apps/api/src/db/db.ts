@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import { Pool } from '@neondatabase/serverless';
-import * as schema from '@/db/schema';
+import * as schema from './schema';
 
 // For serverless environments (Vercel), use Neon's serverless driver
 // It's optimized for edge/serverless with WebSockets

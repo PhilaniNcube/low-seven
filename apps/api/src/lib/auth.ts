@@ -1,9 +1,9 @@
-import { db } from '@/db/db';
+import { db } from '../db/db';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import {betterAuth} from 'better-auth';
 import { openAPI } from 'better-auth/plugins';
 import type { Context } from 'hono';
-import { adminUser } from '@/db/schema';
+import { adminUser } from '../db/schema';
 import { and, eq } from 'drizzle-orm';
 
 export const auth = betterAuth({
