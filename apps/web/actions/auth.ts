@@ -1,6 +1,7 @@
 "use server";
 
 import { z } from "zod";
+import { redirect } from "next/navigation";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -103,11 +104,14 @@ export async function signUpAction(
       };
     }
 
-    return {
-      success: true,
-      message: "Account created successfully",
-    };
+    // Redirect on successful signup
+    redirect("/dashboard");
   } catch (error) {
+    // Check if the error is from redirect (which is expected)
+    if (error instanceof Error && error.message === "NEXT_REDIRECT") {
+      throw error; // Re-throw redirect errors
+    }
+    
     console.error("Sign-up error:", error);
     return {
       message: "An unexpected error occurred. Please try again.",

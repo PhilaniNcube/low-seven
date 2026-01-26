@@ -12,8 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useActionState, useTransition, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useActionState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -33,7 +32,6 @@ const initialState: SignUpState = {
 };
 
 export default function SignUpPage() {
-  const router = useRouter();
   const [state, formAction] = useActionState(signUpAction, initialState);
   const [isPending, startTransition] = useTransition();
 
@@ -44,13 +42,6 @@ export default function SignUpPage() {
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema),
   });
-
-  // Redirect to dashboard on success
-  useEffect(() => {
-    if (state.success) {
-      router.push("/dashboard");
-    }
-  }, [state.success, router]);
 
   const onSubmit = handleSubmit((data) => {
     startTransition(() => {
