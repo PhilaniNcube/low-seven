@@ -19,8 +19,8 @@ const formSchema = z.object({
   description: z.string().max(2000, "Description must be less than 2000 characters").optional().nullable(),
   imageUrl: z.string().url("Invalid image URL").optional().nullable(),
   location: z.string().min(1, "Location is required").max(255, "Location must be less than 255 characters"),
-  durationMinutes: z.coerce.number().int("Duration must be an integer").positive("Duration must be positive"),
-  price: z.coerce.number().nonnegative("Price must be non-negative"),
+  durationMinutes: z.number().int("Duration must be an integer").positive("Duration must be positive"),
+  price: z.number().nonnegative("Price must be non-negative"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -126,7 +126,7 @@ export function AddActivityForm() {
             <Input
               id="durationMinutes"
               type="number"
-              {...register("durationMinutes")}
+              {...register("durationMinutes", { valueAsNumber: true })}
               placeholder="e.g., 180"
               min="1"
               step="1"
@@ -147,7 +147,7 @@ export function AddActivityForm() {
             <Input
               id="price"
               type="number"
-              {...register("price")}
+              {...register("price", { valueAsNumber: true })}
               placeholder="e.g., 150.00"
               min="0"
               step="0.01"
