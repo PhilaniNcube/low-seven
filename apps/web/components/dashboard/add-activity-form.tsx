@@ -40,7 +40,7 @@ export function AddActivityForm() {
   const {
     register,
     formState: { errors },
-    reset,
+
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
   });
