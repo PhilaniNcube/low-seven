@@ -1,11 +1,17 @@
 {
   "compilerOptions": {
     "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "baseUrl": ".",
+    "outDir": "./dist",
     "paths": {
       "@/*": ["./src/*"]
     }
-  }
+  },
+  "include": ["src/**/*", "api/**/*"],
+  "exclude": ["node_modules"]
 }

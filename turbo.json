@@ -6,9 +6,6 @@
       "dependsOn": ["^build"],
       "outputs": []
     },
-    "api#build": {
-      "outputs": ["api/index.js"]
-    },
     "web#build": {
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
