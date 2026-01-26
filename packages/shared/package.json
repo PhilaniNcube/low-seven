@@ -5,6 +5,10 @@
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "scripts": {
+    "build": "echo 'Using TypeScript source files directly'",
+    "dev": "echo 'Using TypeScript source files directly'"
+  },
   "exports": {
     "./auth": {
       "types": "./src/auth.ts",
