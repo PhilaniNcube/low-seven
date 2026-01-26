@@ -32,7 +32,55 @@ app
 .route('/api/reviews', reviewsRoute)
 .route('/api/guides', guidesRoute)
 .get('/', (c) => {
-  return c.text('Hello Hono!')
+  return c.json({
+    name: 'Low Seven Tours API',
+    version: '1.0.0',
+    description: 'API for managing tour activities, packages, bookings, payments, reviews, and guides',
+    endpoints: {
+      auth: {
+        path: '/api/auth/*',
+        description: 'Authentication endpoints',
+        methods: ['GET', 'POST'],
+      },
+      activities: {
+        path: '/api/activities',
+        description: 'Manage tour activities',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      },
+      packages: {
+        path: '/api/packages',
+        description: 'Manage tour packages',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      },
+      bookings: {
+        path: '/api/bookings',
+        description: 'Manage customer bookings',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      },
+      payments: {
+        path: '/api/payments',
+        description: 'Process payments and manage transactions',
+        methods: ['GET', 'POST'],
+      },
+      reviews: {
+        path: '/api/reviews',
+        description: 'Manage customer reviews',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      },
+      guides: {
+        path: '/api/guides',
+        description: 'Manage tour guides',
+        methods: ['GET', 'POST', 'PUT', 'DELETE'],
+      },
+      webhooks: {
+        path: '/api/webhooks',
+        description: 'Webhook endpoints for external integrations',
+        methods: ['POST'],
+      },
+    },
+    documentation: 'Visit the respective endpoints for detailed information',
+    status: 'online',
+  })
 })
 
 export default app
