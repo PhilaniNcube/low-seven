@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "bun run --hot --port 3000 src/index.ts",
+    "build": "echo 'Build step complete'",
     "db:up": "docker compose up -d",
     "db:stop": "docker compose stop",
     "db:generate:migration": "drizzle-kit generate",
@@ -12,6 +13,7 @@
     "open-auth-docs": "open-cli http://localhost:3000/api/auth/reference"
   },
   "dependencies": {
+    "@hono/node-server": "^1.19.9",
     "@hono/zod-validator": "^0.7.6",
     "@low-seven/shared": "workspace:*",
     "@neondatabase/serverless": "^1.0.2",
