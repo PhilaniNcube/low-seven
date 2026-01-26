@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "tsup",
     "dev": "bun run --hot --port 3000 src/index.ts",
     "db:up": "docker compose up -d",
     "db:stop": "docker compose stop",

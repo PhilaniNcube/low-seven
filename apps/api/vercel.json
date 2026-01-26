@@ -1,8 +1,10 @@
 {
+  "buildCommand": "cd ../.. && turbo run build --filter=api",
+  "outputDirectory": "dist",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api/index"
+      "destination": "/index"
     }
   ]
 }
