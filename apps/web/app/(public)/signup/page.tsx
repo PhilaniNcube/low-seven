@@ -12,11 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useActionState, useTransition } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { signUpAction, type SignUpState } from "@/actions/auth";
+import { signUp } from "@/lib/auth-client";
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -26,14 +27,10 @@ const signUpSchema = z.object({
 
 type SignUpFormData = z.infer<typeof signUpSchema>;
 
-const initialState: SignUpState = {
-  errors: undefined,
-  message: undefined,
-};
-
 export default function SignUpPage() {
-  const [state, formAction] = useActionState(signUpAction, initialState);
-  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const {
     register,
@@ -43,14 +40,26 @@ export default function SignUpPage() {
     resolver: zodResolver(signUpSchema),
   });
 
-  const onSubmit = handleSubmit((data) => {
-    startTransition(() => {
-      const formData = new FormData();
-      formData.append("name", data.name);
-      formData.append("email", data.email);
-      formData.append("password", data.password);
-      formAction(formData);
-    });
+  const onSubmit = handleSubmit(async (data) => {
+    setErrorMessage(null);
+    setIsPending(true);
+
+    await signUp.email(
+      {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+        onError: (ctx) => {
+          setErrorMessage(ctx.error.message || "Failed to create account");
+          setIsPending(false);
+        },
+      }
+    );
   });
 
   return (
@@ -69,9 +78,9 @@ export default function SignUpPage() {
               <div className="relative">
                
               </div>
-              {state.message && !state.success && (
+              {errorMessage && (
                 <div className="text-sm text-red-500">
-                  {state.message}
+                  {errorMessage}
                 </div>
               )}
               <div className="grid gap-2">
@@ -86,9 +95,6 @@ export default function SignUpPage() {
                 {errors.name && (
                   <p className="text-sm text-red-500">{errors.name.message}</p>
                 )}
-                {state.errors?.name && (
-                  <p className="text-sm text-red-500">{state.errors.name[0]}</p>
-                )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -102,9 +108,6 @@ export default function SignUpPage() {
                 {errors.email && (
                   <p className="text-sm text-red-500">{errors.email.message}</p>
                 )}
-                {state.errors?.email && (
-                  <p className="text-sm text-red-500">{state.errors.email[0]}</p>
-                )}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
@@ -116,9 +119,6 @@ export default function SignUpPage() {
                 />
                 {errors.password && (
                   <p className="text-sm text-red-500">{errors.password.message}</p>
-                )}
-                {state.errors?.password && (
-                  <p className="text-sm text-red-500">{state.errors.password[0]}</p>
                 )}
               </div>
             </CardContent>
