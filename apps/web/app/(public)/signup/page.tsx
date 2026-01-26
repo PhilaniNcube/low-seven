@@ -1,6 +1,5 @@
 "use client";
 
-import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,13 +12,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { useActionState, useTransition, useEffect, useState } from "react";
+import { useActionState, useTransition, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { signUpAction, type SignUpState } from "@/actions/auth";
-import { signUp } from "@/lib/auth-client";
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -38,7 +36,6 @@ export default function SignUpPage() {
   const router = useRouter();
   const [state, formAction] = useActionState(signUpAction, initialState);
   const [isPending, startTransition] = useTransition();
-  const [authError, setAuthError] = useState<string | null>(null);
 
   const {
     register,
@@ -48,33 +45,14 @@ export default function SignUpPage() {
     resolver: zodResolver(signUpSchema),
   });
 
-  // Handle authentication after successful validation
+  // Redirect to dashboard on success
   useEffect(() => {
-    if (state.success && state.data) {
-      const performSignUp = async () => {
-        try {
-          await signUp.email(
-            {
-              name: state.data!.name,
-              email: state.data!.email,
-              password: state.data!.password,
-            },
-            {
-              onError: (ctx) => {
-                setAuthError(ctx.error.message || "Failed to create account");
-              },
-            }
-          );
-        } catch (error) {
-          setAuthError("An unexpected error occurred");
-        }
-      };
-      performSignUp();
+    if (state.success) {
+      router.push("/dashboard");
     }
-  }, [state.success, state.data, router]);
+  }, [state.success, router]);
 
   const onSubmit = handleSubmit((data) => {
-    setAuthError(null);
     startTransition(() => {
       const formData = new FormData();
       formData.append("name", data.name);
@@ -100,11 +78,11 @@ export default function SignUpPage() {
               <div className="relative">
                
               </div>
-              {(state.message && !state.success) || authError ? (
+              {state.message && !state.success && (
                 <div className="text-sm text-red-500">
-                  {authError || state.message}
+                  {state.message}
                 </div>
-              ) : null}
+              )}
               <div className="grid gap-2">
                 <Label htmlFor="name">Name</Label>
                 <Input
