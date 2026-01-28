@@ -13,7 +13,7 @@ const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(",") || [
 
 console.log("[Auth] Initializing with trusted origins:", trustedOrigins);
 
-if (!process.env.DATABASE_URL) {
+if (!process.env.TURSO_DATABASE_URL) {
   console.error("[Auth] DATABASE_URL is not set!");
 } else {
   console.log("[Auth] DATABASE_URL is set");

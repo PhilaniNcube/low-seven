@@ -34,7 +34,7 @@ app.get("/api/health", async (c) => {
   
   try {
     // Test database connection
-    await db.execute(sql`SELECT 1`);
+    await db.run(sql`SELECT 1`);
     const dbResponseTime = Date.now() - startTime;
     
     return c.json({
@@ -45,7 +45,7 @@ app.get("/api/health", async (c) => {
         responseTime: `${dbResponseTime}ms`
       },
       environment: {
-        hasDbUrl: !!process.env.DATABASE_URL,
+        hasDbUrl: !!process.env.TURSO_DATABASE_URL,
         hasCorsOrigins: !!process.env.CORS_ORIGINS,
         hasTrustedOrigins: !!process.env.TRUSTED_ORIGINS,
         corsOrigins: process.env.CORS_ORIGINS?.split(",").length || 0,
@@ -65,7 +65,7 @@ app.get("/api/health", async (c) => {
         error: error instanceof Error ? error.message : "Unknown error"
       },
       environment: {
-        hasDbUrl: !!process.env.DATABASE_URL,
+        hasDbUrl: !!process.env.TURSO_DATABASE_URL,
         hasCorsOrigins: !!process.env.CORS_ORIGINS,
         hasTrustedOrigins: !!process.env.TRUSTED_ORIGINS,
       }
@@ -86,7 +86,7 @@ app.get("/api/debug/env", async (c) => {
       parsed: process.env.TRUSTED_ORIGINS?.split(",") || [],
       count: process.env.TRUSTED_ORIGINS?.split(",").length || 0,
     },
-    hasDbUrl: !!process.env.DATABASE_URL,
+    hasDbUrl: !!process.env.TURSO_DATABASE_URL,
     requestOrigin: c.req.header("origin") || "no origin header",
     allowedInCors: allowedOrigins,
   });
@@ -104,7 +104,7 @@ app
       // Test database connection first
       console.log("[Auth Handler] Testing database connection...");
       const dbTestStart = Date.now();
-      await db.execute(sql`SELECT 1`);
+      await db.run(sql`SELECT 1`);
       console.log("[Auth Handler] Database connected in", Date.now() - dbTestStart, "ms");
       
       console.log("[Auth Handler] Calling auth.handler...");
