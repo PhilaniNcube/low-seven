@@ -94,7 +94,18 @@ app.get("/api/debug/env", async (c) => {
 
 app
   .all("/api/auth/*", async (c) => {
-    return await auth.handler(c.req.raw);
+    const response = await auth.handler(c.req.raw);
+    
+    // Manually add CORS headers to auth responses since Better Auth bypasses Hono middleware
+    const origin = c.req.header("origin");
+    if (origin && allowedOrigins.includes(origin)) {
+      response.headers.set("Access-Control-Allow-Origin", origin);
+      response.headers.set("Access-Control-Allow-Credentials", "true");
+      response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    }
+    
+    return response;
   })
   .route("/api/webhooks", paymentsRoute) // Webhook routes (no auth)
   .route("/api/activities", activitiesRoute)
