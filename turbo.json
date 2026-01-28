@@ -12,7 +12,17 @@
     },
     "api#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
+      "outputs": ["dist/**"],
+      "env": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTERAUTH_URL",
+        "CORS_ORIGINS",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_PUBLISHABLE_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "TRUSTED_ORIGINS"
+      ]
     },
     "web#build": {
       "dependsOn": ["^build"],
