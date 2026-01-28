@@ -51,6 +51,12 @@ export default function SignInPage() {
   useEffect(() => {
     if (state.success && state.data) {
       const performSignIn = async () => {
+        const timeoutId = setTimeout(() => {
+          setAuthError(
+            "Connection timeout. Please check your internet connection and try again."
+          );
+        }, 30000); // 30 second timeout
+
         try {
           await signIn.email(
             {
@@ -59,12 +65,42 @@ export default function SignInPage() {
             },
             {
               onError: (ctx) => {
-                setAuthError(ctx.error.message || "Failed to sign in");
+                clearTimeout(timeoutId);
+                const errorMessage = ctx.error.message || "Failed to sign in";
+                
+                // Provide more helpful error messages
+                if (errorMessage.includes("fetch") || errorMessage.includes("network")) {
+                  setAuthError(
+                    "Unable to connect to authentication server. Please check your connection and try again."
+                  );
+                } else if (errorMessage.includes("credentials")) {
+                  setAuthError("Invalid email or password. Please try again.");
+                } else {
+                  setAuthError(errorMessage);
+                }
+              },
+              onSuccess: () => {
+                clearTimeout(timeoutId);
               },
             }
           );
         } catch (error) {
-          setAuthError("An unexpected error occurred");
+          clearTimeout(timeoutId);
+          if (error instanceof Error) {
+            if (error.name === "AbortError" || error.message.includes("timeout")) {
+              setAuthError(
+                "Request timeout. The server took too long to respond. Please try again."
+              );
+            } else if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+              setAuthError(
+                "Network error. Please check if the API server is running and accessible."
+              );
+            } else {
+              setAuthError(error.message || "An unexpected error occurred");
+            }
+          } else {
+            setAuthError("An unexpected error occurred. Please try again.");
+          }
         }
       };
       performSignIn();
@@ -93,7 +129,16 @@ export default function SignInPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="grid gap-4">
-              
+              {authError && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                  {authError}
+                </div>
+              )}
+              {state.message && !authError && (
+                <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                  {state.message}
+                </div>
+              )}
               <div className="relative">
              
            
