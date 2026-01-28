@@ -38,12 +38,22 @@ export const auth = betterAuth({
   baseURL: process.env.BETTERAUTH_URL || "http://localhost:3000",
   emailAndPassword: {
     enabled: true,
+    // Add autoSignIn to skip email verification for testing
+    autoSignIn: false,
+    sendVerificationEmail: async () => {
+      console.log("[Auth] Skipping email verification");
+    },
   },
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
   trustedOrigins,
   plugins: [openAPI()],
+  // Add advanced options for debugging
+  advanced: {
+    useSecureCookies: process.env.NODE_ENV === "production",
+    generateId: () => crypto.randomUUID(),
+  },
 });
 
 console.log("[Auth] Better Auth instance created successfully");

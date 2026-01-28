@@ -3,20 +3,30 @@ import { Pool, neonConfig } from '@neondatabase/serverless';
 import * as schema from './schema';
 import ws from 'ws';
 
+console.log("[Database] Configuring connection...");
+console.log("[Database] Has DATABASE_URL:", !!process.env.DATABASE_URL);
+console.log("[Database] Environment:", process.env.VERCEL ? 'Vercel' : 'Local');
+
 // Configure WebSocket for serverless (Node.js environments)
 if (typeof window === 'undefined') {
   neonConfig.webSocketConstructor = ws;
 }
 
-console.log("[Database] Configuring connection pool...");
-console.log("[Database] Has DATABASE_URL:", !!process.env.DATABASE_URL);
+// CRITICAL: Disable pipelining for Vercel - this often causes hangs
+neonConfig.pipelineConnect = false;
+neonConfig.pipelineTLS = false;
+
+// Increase fetch timeout for Vercel cold starts
+neonConfig.fetchConnectionCache = true;
+
+console.log("[Database] Neon config set - pipelining disabled for Vercel compatibility");
 
 // For serverless environments (Vercel), use Neon's serverless driver
 // It's optimized for edge/serverless with WebSockets
 export const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   // Serverless-friendly settings
-  connectionTimeoutMillis: 10000, // 10 seconds connection timeout (increased from 5)
+  connectionTimeoutMillis: 15000, // 15 seconds connection timeout (increased for Vercel)
   idleTimeoutMillis: 30000, // 30 seconds idle timeout
   max: 1, // Limit connections in serverless
 });
