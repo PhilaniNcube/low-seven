@@ -17,7 +17,17 @@ if (!process.env.DATABASE_URL) {
   console.error("[Auth] DATABASE_URL is not set!");
 }
 
+if (!process.env.BETTER_AUTH_SECRET) {
+  console.warn("[Auth] BETTER_AUTH_SECRET is not set! Using fallback for development.");
+}
+
+if (!process.env.BETTERAUTH_URL) {
+  console.warn("[Auth] BETTERAUTH_URL is not set! This is required for production.");
+}
+
 export const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET || "fallback-secret-for-development-only-change-in-production",
+  baseURL: process.env.BETTERAUTH_URL || "http://localhost:3000",
   emailAndPassword: {
     enabled: true,
   },
