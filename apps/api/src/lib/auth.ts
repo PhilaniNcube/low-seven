@@ -1,26 +1,25 @@
-import { db } from '../db/db';
-import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import {betterAuth} from 'better-auth';
-import { openAPI } from 'better-auth/plugins';
-import type { Context } from 'hono';
-import { adminUser } from '../db/schema';
-import { and, eq } from 'drizzle-orm';
+import { db } from "../db/db";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { betterAuth } from "better-auth";
+import { openAPI } from "better-auth/plugins";
+import type { Context } from "hono";
+import { adminUser } from "../db/schema";
+import { and, eq } from "drizzle-orm";
+
+const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(",") || [
+  "http://localhost:3001",
+  "http://localhost:3000",
+];
 
 export const auth = betterAuth({
-    emailAndPassword: {
+  emailAndPassword: {
     enabled: true,
-    },
+  },
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
-  trustedOrigins: [
-    'http://localhost:3001', 
-    'http://localhost:3000',
-    'https://low-seven-web.vercel.app'
-  ],
-  plugins: [
-    openAPI()
-  ],
+  trustedOrigins,
+  plugins: [openAPI()],
 });
 
 /**
@@ -30,10 +29,7 @@ export const auth = betterAuth({
  */
 export const isUserAdmin = async (userId: string): Promise<boolean> => {
   const admin = await db.query.adminUser.findFirst({
-    where: and(
-      eq(adminUser.userId, userId),
-      eq(adminUser.isActive, true)
-    ),
+    where: and(eq(adminUser.userId, userId), eq(adminUser.isActive, true)),
   });
 
   return !!admin;
@@ -46,22 +42,22 @@ export const isUserAdmin = async (userId: string): Promise<boolean> => {
 export const requireAdmin = async (c: Context, next: () => Promise<void>) => {
   try {
     // Get session from the request
-    const session = await auth.api.getSession({ 
-      headers: c.req.raw.headers 
+    const session = await auth.api.getSession({
+      headers: c.req.raw.headers,
     });
 
-    console.log('Session in requireAdmin middleware:', session);
+    console.log("Session in requireAdmin middleware:", session);
 
     // Check if user is authenticated
     if (!session || !session.user) {
-      return c.json({ error: 'Unauthorized - Please login' }, 401);
+      return c.json({ error: "Unauthorized - Please login" }, 401);
     }
 
     // Check if user is an active admin
     const isAdmin = await isUserAdmin(session.user.id);
 
     if (!isAdmin) {
-      return c.json({ error: 'Forbidden - Admin access required' }, 403);
+      return c.json({ error: "Forbidden - Admin access required" }, 403);
     }
 
     // Fetch admin details for context
@@ -70,13 +66,16 @@ export const requireAdmin = async (c: Context, next: () => Promise<void>) => {
     });
 
     // Attach user and admin info to context for use in route handlers
-    c.set('user', session.user);
-    c.set('admin', admin);
+    c.set("user", session.user);
+    c.set("admin", admin);
 
     await next();
   } catch (error) {
-    console.error('Admin authentication error:', error);
-    return c.json({ error: 'Internal server error during authentication' }, 500);
+    console.error("Admin authentication error:", error);
+    return c.json(
+      { error: "Internal server error during authentication" },
+      500,
+    );
   }
 };
 
@@ -88,20 +87,20 @@ export const requireAdminRole = (allowedRoles: string[]) => {
   return async (c: Context, next: () => Promise<void>) => {
     try {
       // Get session from the request
-      const session = await auth.api.getSession({ 
-        headers: c.req.raw.headers 
+      const session = await auth.api.getSession({
+        headers: c.req.raw.headers,
       });
 
       // Check if user is authenticated
       if (!session || !session.user) {
-        return c.json({ error: 'Unauthorized - Please login' }, 401);
+        return c.json({ error: "Unauthorized - Please login" }, 401);
       }
 
       // Check if user is an active admin
       const isAdmin = await isUserAdmin(session.user.id);
 
       if (!isAdmin) {
-        return c.json({ error: 'Forbidden - Admin access required' }, 403);
+        return c.json({ error: "Forbidden - Admin access required" }, 403);
       }
 
       // Fetch admin details for role checking
@@ -111,19 +110,25 @@ export const requireAdminRole = (allowedRoles: string[]) => {
 
       // Check if admin has the required role
       if (!admin || !allowedRoles.includes(admin.role)) {
-        return c.json({ 
-          error: `Forbidden - Requires one of the following roles: ${allowedRoles.join(', ')}` 
-        }, 403);
+        return c.json(
+          {
+            error: `Forbidden - Requires one of the following roles: ${allowedRoles.join(", ")}`,
+          },
+          403,
+        );
       }
 
       // Attach user and admin info to context
-      c.set('user', session.user);
-      c.set('admin', admin);
+      c.set("user", session.user);
+      c.set("admin", admin);
 
       await next();
     } catch (error) {
-      console.error('Admin role authentication error:', error);
-      return c.json({ error: 'Internal server error during authentication' }, 500);
+      console.error("Admin role authentication error:", error);
+      return c.json(
+        { error: "Internal server error during authentication" },
+        500,
+      );
     }
   };
 };
@@ -135,21 +140,24 @@ export const requireAdminRole = (allowedRoles: string[]) => {
 export const requireAuth = async (c: Context, next: () => Promise<void>) => {
   try {
     // Get session from the request
-    const session = await auth.api.getSession({ 
-      headers: c.req.raw.headers 
+    const session = await auth.api.getSession({
+      headers: c.req.raw.headers,
     });
 
     // Check if user is authenticated
     if (!session || !session.user) {
-      return c.json({ error: 'Unauthorized - Please login' }, 401);
+      return c.json({ error: "Unauthorized - Please login" }, 401);
     }
 
     // Attach user info to context
-    c.set('user', session.user);
+    c.set("user", session.user);
 
     await next();
   } catch (error) {
-    console.error('Authentication error:', error);
-    return c.json({ error: 'Internal server error during authentication' }, 500);
+    console.error("Authentication error:", error);
+    return c.json(
+      { error: "Internal server error during authentication" },
+      500,
+    );
   }
 };
