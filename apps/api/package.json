@@ -29,6 +29,15 @@
     "ws": "^8.19.0",
     "zod": "^4.3.5"
   },
+  "optionalDependencies": {
+    "@libsql/darwin-arm64": "^0.4.6",
+    "@libsql/darwin-x64": "^0.4.6",
+    "@libsql/linux-arm64-gnu": "^0.4.6",
+    "@libsql/linux-arm64-musl": "^0.4.6",
+    "@libsql/linux-x64-gnu": "^0.4.6",
+    "@libsql/linux-x64-musl": "^0.4.6",
+    "@libsql/win32-x64-msvc": "^0.4.6"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/node": "^25.1.0",
