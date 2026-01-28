@@ -104,17 +104,17 @@ TRUSTED_ORIGINS=https://your-exact-web-url.vercel.app
 ## 📝 Setup Checklist
 
 ### Web App Setup:
-- [ ] `NEXT_PUBLIC_API_URL` is set
-- [ ] URL points to correct API deployment
-- [ ] No trailing slash in URL
+- [*] `NEXT_PUBLIC_API_URL` is set
+- [*] URL points to correct API deployment
+- [*] No trailing slash in URL
 - [ ] Redeployed after setting variable
 
 ### API Setup:
-- [ ] `CORS_ORIGINS` includes web app URL(s)
-- [ ] `TRUSTED_ORIGINS` includes web app URL(s)
-- [ ] `DATABASE_URL` is set correctly
-- [ ] No trailing slashes in origin URLs
-- [ ] Redeployed after setting variables
+- [*] `CORS_ORIGINS` includes web app URL(s)
+- [*] `TRUSTED_ORIGINS` includes web app URL(s)
+- [*] `DATABASE_URL` is set correctly
+- [*] No trailing slashes in origin URLs
+- [*] Redeployed after setting variables
 
 ### Testing:
 - [ ] Sign in works without timeout
