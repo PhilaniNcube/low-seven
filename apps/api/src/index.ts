@@ -101,8 +101,22 @@ app
     });
     
     try {
+      // Test database connection first
+      console.log("[Auth Handler] Testing database connection...");
+      const dbTestStart = Date.now();
+      await db.execute(sql`SELECT 1`);
+      console.log("[Auth Handler] Database connected in", Date.now() - dbTestStart, "ms");
+      
       console.log("[Auth Handler] Calling auth.handler...");
-      const response = await auth.handler(c.req.raw);
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Auth handler timeout after 25 seconds")), 25000);
+      });
+      
+      const handlerPromise = auth.handler(c.req.raw);
+      
+      const response = await Promise.race([handlerPromise, timeoutPromise]) as Response;
       
       console.log("[Auth Handler] Response:", {
         status: response.status,
