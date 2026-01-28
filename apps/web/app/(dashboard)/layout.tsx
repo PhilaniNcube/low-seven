@@ -8,8 +8,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
+    <>
         <SidebarProvider
           style={
             {
@@ -30,7 +29,6 @@ export default async function DashboardLayout({
             </div>
           </SidebarInset>
         </SidebarProvider>
-      </body>
-    </html>
+      </>
   );
 }

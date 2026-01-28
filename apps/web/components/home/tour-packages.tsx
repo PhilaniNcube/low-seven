@@ -60,7 +60,9 @@ export function TourPackages() {
                 <Image
                   src={pkg.imageUrl || "/placeholder.svg"}
                   alt={pkg.name}
-                  fill
+                  // fill
+                  width={400}
+                  height={300}
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>

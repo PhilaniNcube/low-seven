@@ -67,7 +67,9 @@ export function Destinations() {
               <Image
                 src={destination.image || "/placeholder.svg"}
                 alt={`${destination.name} by ${destination.photographer}`}
-                fill
+                width={800}
+                height={500}
+                // fill
                 className="object-cover transition-transform duration-500 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-linear-to-t from-foreground/80 via-foreground/20 to-transparent" />
