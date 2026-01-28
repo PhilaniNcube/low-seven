@@ -198,7 +198,142 @@ curl https://your-api-url.vercel.app/api/auth/reference
 4. **Test the application** thoroughly
 5. **Check browser console** for any errors
 
-## 🔐 Security Best Practices
+## � Troubleshooting Timeout Errors
+
+If you're experiencing "Connection timeout" errors during sign-in, follow these steps:
+
+### Step 1: Verify Environment Variables
+
+**On Web App (Next.js) Project:**
+```bash
+# Check in Vercel Dashboard → Settings → Environment Variables
+NEXT_PUBLIC_API_URL=https://your-api-project.vercel.app
+```
+- ❌ **NO trailing slash:** `https://api.example.com/`
+- ✅ **Correct format:** `https://api.example.com`
+
+**On API (Hono) Project:**
+```bash
+# Check in Vercel Dashboard → Settings → Environment Variables
+CORS_ORIGINS=https://your-web-app.vercel.app
+TRUSTED_ORIGINS=https://your-web-app.vercel.app
+DATABASE_URL=postgresql://...
+```
+- ❌ **NO trailing slashes in origins**
+- ✅ Include **ALL domains** where your web app is accessed (production URL, preview URLs if needed)
+
+### Step 2: Test API Endpoint
+
+Open your browser console and run:
+```javascript
+fetch('https://your-api-project.vercel.app/api/health', {
+  method: 'GET',
+  credentials: 'include'
+}).then(r => r.json()).then(console.log).catch(console.error)
+```
+
+Expected response:
+```json
+{
+  "status": "healthy",
+  "database": {
+    "status": "connected",
+    "responseTime": "50ms"
+  },
+  "environment": {
+    "hasDbUrl": true,
+    "hasCorsOrigins": true,
+    "hasTrustedOrigins": true,
+    "corsOrigins": 1,
+    "trustedOrigins": 1
+  }
+}
+```
+
+### Step 3: Check Browser Console
+
+1. Open your deployed web app
+2. Open Developer Tools (F12)
+3. Go to Console tab
+4. Look for these messages:
+   - `[Auth Client] Using API URL: https://...` - Should show your API URL
+   - Any CORS errors indicate misconfigured `CORS_ORIGINS`
+   - Any network errors indicate connectivity issues
+
+### Step 4: Check Network Tab
+
+1. Open Developer Tools → Network tab
+2. Try to sign in
+3. Look for requests to `/api/auth/sign-in/email`
+4. Check:
+   - ❌ **Status: (failed)** → API not reachable
+   - ❌ **Status: 0** → CORS issue
+   - ❌ **Status: 500** → Server error (check API logs)
+   - ✅ **Status: 200** → Success
+
+### Step 5: Common Issues
+
+**Issue: CORS Error**
+```
+Access to fetch at 'https://api.../auth/...' from origin 'https://web...' has been blocked by CORS policy
+```
+**Solution:**
+- Add your web app URL to `CORS_ORIGINS` in API project
+- Add your web app URL to `TRUSTED_ORIGINS` in API project
+- Redeploy the API project
+- Example: `CORS_ORIGINS=https://your-web-app.vercel.app,https://www.yourdomain.com`
+
+**Issue: API URL Not Set**
+```
+⚠️ NEXT_PUBLIC_API_URL is not set. Falling back to localhost:3000
+```
+**Solution:**
+- Set `NEXT_PUBLIC_API_URL` in Web App project
+- Redeploy the Web App project
+
+**Issue: 404 Not Found**
+```
+GET https://your-api.vercel.app/api/auth/sign-in/email 404
+```
+**Solution:**
+- Verify API is deployed and accessible
+- Check that the API project build succeeded
+- Visit `https://your-api.vercel.app/` to see if it responds
+
+**Issue: Database Connection Error**
+```
+status: "unhealthy", database: { status: "error" }
+```
+**Solution:**
+- Verify `DATABASE_URL` is set correctly in API project
+- Check database is accessible from Vercel (IP whitelist if using managed DB)
+- Ensure DATABASE_URL includes all required parameters
+
+### Step 6: Force Redeploy
+
+After changing environment variables, you **MUST** redeploy:
+
+1. Go to Vercel Dashboard → Your Project
+2. Click on "Deployments" tab
+3. Click the "..." menu on the latest deployment
+4. Click "Redeploy"
+5. Select "Use existing Build Cache: No"
+6. Click "Redeploy"
+
+Or trigger via Git:
+```bash
+git commit --allow-empty -m "Force redeploy"
+git push
+```
+
+### Step 7: Check Vercel Function Logs
+
+1. Go to Vercel Dashboard → Your API Project
+2. Click on "Logs" tab
+3. Filter for errors during sign-in attempts
+4. Look for database connection errors or other issues
+
+## �🔐 Security Best Practices
 
 - ✅ Never commit environment variables to Git
 - ✅ Use different values for Production vs Preview environments

@@ -14,6 +14,7 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"],
       "env": [
+        "NEXT_PUBLIC_API_URL",
         "DATABASE_URL",
         "BETTER_AUTH_SECRET",
         "BETTERAUTH_URL",
@@ -26,7 +27,10 @@
     },
     "web#build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"]
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "NEXT_PUBLIC_API_URL"
+      ]
     },
     "lint": {
       "dependsOn": ["^lint"]
