@@ -1,11 +1,5 @@
 import { relations, sql } from "drizzle-orm";
-import {
-  sqliteTable,
-  text,
-  integer,
-  index,
-  primaryKey,
-} from "drizzle-orm/sqlite-core";
+import { integer, real, sqliteTable, text, index, primaryKey } from "drizzle-orm/sqlite-core";
 
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
@@ -13,11 +7,8 @@ export const user = sqliteTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: integer("email_verified").default(0).notNull(),
   image: text("image"),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  updatedAt: integer("updated_at")
-    
-    
-    .notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
 });
 
 export const session = sqliteTable(
@@ -26,10 +17,8 @@ export const session = sqliteTable(
     id: text("id").primaryKey(),
     expiresAt: integer("expires_at").notNull(),
     token: text("token").notNull().unique(),
-    createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updated_at")
-      
-      .notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
     userId: text("user_id")
@@ -55,10 +44,8 @@ export const account = sqliteTable(
     refreshTokenExpiresAt: integer("refresh_token_expires_at"),
     scope: text("scope"),
     password: text("password"),
-    createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updated_at")
-      
-      .notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)],
 );
@@ -70,11 +57,8 @@ export const verification = sqliteTable(
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
     expiresAt: integer("expires_at").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updated_at")
-      
-      
-      .notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
@@ -89,12 +73,9 @@ export const adminUser = sqliteTable(
       .references(() => user.id, { onDelete: "cascade" }),
     role: text("role").default("admin").notNull(), // e.g., "admin", "super_admin", "moderator"
     permissions: text("permissions"), // JSON string for granular permissions
-    isActive: integer("is_active").default(1).notNull(),
-    createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-    updatedAt: integer("updated_at")
-      
-      
-      .notNull(),
+    isActive: integer("is_active", { mode: "boolean" }).default(true).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
   },
   (table) => [
     index("admin_user_userId_idx").on(table.userId),
@@ -146,12 +127,9 @@ export const activities = sqliteTable("activity", {
   imageUrl: text("image_url"),
   location: text("location").notNull(),
   durationMinutes: integer("duration_minutes").notNull(), // e.g., 120 for 2 hours
-  price: text("price", { precision: 10, scale: 2 }).notNull(), // Store generic catalog price
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  updatedAt: integer("updated_at")
-    
-    
-    .notNull(),
+  price: real("price").notNull(), // Store generic catalog price
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
 });
 
 // 1a. Activity Media: Images and videos for activities
@@ -164,7 +142,7 @@ export const activityMedia = sqliteTable("activity_media", {
   mediaType: text("media_type").notNull(), // 'image' or 'video'
   altText: text("alt_text"),
   displayOrder: integer("display_order").default(0).notNull(), // For ordering media items
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
 }, (table) => [
   index("activity_media_activityId_idx").on(table.activityId)
 ]);
@@ -176,12 +154,9 @@ export const packages = sqliteTable("package", {
   description: text("description").notNull(),
   imageUrl: text("image_url"),
   isCustom: integer("is_custom").default(0).notNull(), // distinct bespoke templates
-  basePrice: text("base_price", { precision: 10, scale: 2 }), // Optional base fee
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  updatedAt: integer("updated_at")
-    
-    
-    .notNull(),
+  basePrice: real("base_price"), // Optional base fee
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
 });
 
 // 2a. Package Media: Images and videos for packages
@@ -194,7 +169,7 @@ export const packageMedia = sqliteTable("package_media", {
   mediaType: text("media_type").notNull(), // 'image' or 'video'
   altText: text("alt_text"),
   displayOrder: integer("display_order").default(0).notNull(), // For ordering media items
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
 }, (table) => [
   index("package_media_packageId_idx").on(table.packageId)
 ]);
@@ -226,15 +201,12 @@ export const bookings = sqliteTable("booking", {
   packageId: text("package_id")
     .references(() => packages.id, { onDelete: "set null" }), // Nullable for purely bespoke bookings
   status: text("status").default("pending").notNull(),
-  totalPrice: text("total_price", { precision: 10, scale: 2 }).notNull(),
+  totalPrice: real("total_price").notNull(),
   startDate: integer("start_date").notNull(),
   endDate: integer("end_date").notNull(),
   specialRequests: text("special_requests"),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  updatedAt: integer("updated_at")
-    
-    
-    .notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
 }, (table) => [
   index("booking_user_idx").on(table.userId)
 ]);
@@ -253,7 +225,7 @@ export const bookingActivities = sqliteTable("booking_activity", {
     .references(() => guides.id, { onDelete: "set null" }), // Optional guide assignment
   // We snapshot the price here. If the catalog price changes later, 
   // this historic booking record remains accurate.
-  priceAtBooking: text("price_at_booking", { precision: 10, scale: 2 }).notNull(),
+  priceAtBooking: real("price_at_booking").notNull(),
   scheduledAt: integer("scheduled_at"), // Specific time for this activity
 }, (table) => [
   index("booking_activity_guideId_idx").on(table.guideId),
@@ -271,11 +243,8 @@ export const reviews = sqliteTable("review", {
   rating: integer("rating").notNull(), // 1-5 stars
   comment: text("comment"),
   isVerified: integer("is_verified").default(1).notNull(), // Verified purchase
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  updatedAt: integer("updated_at")
-    
-    
-    .notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
 }, (table) => [
   index("review_bookingActivityId_idx").on(table.bookingActivityId),
   index("review_userId_idx").on(table.userId),
@@ -287,7 +256,7 @@ export const payments = sqliteTable("payment", {
   bookingId: text("booking_id")
     .notNull()
     .references(() => bookings.id, { onDelete: "cascade" }),
-  amount: text("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: real("amount").notNull(),
   currency: text("currency").default("USD").notNull(), // ISO 4217 currency code
   paymentMethod: text("payment_method").notNull(),
   paymentStatus: text("status").default("pending").notNull(),
@@ -295,11 +264,8 @@ export const payments = sqliteTable("payment", {
   paymentProvider: text("payment_provider"), // e.g., 'stripe', 'paypal', 'square'
   paymentIntentId: text("payment_intent_id"), // For providers like Stripe
   metadata: text("metadata"), // JSON string for additional payment data
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  updatedAt: integer("updated_at")
-    
-    
-    .notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
 }, (table) => [
   index("payment_bookingId_idx").on(table.bookingId),
   index("payment_status_idx").on(table.paymentStatus),
@@ -315,12 +281,9 @@ export const guides = sqliteTable("guide", {
   bio: text("bio"),
   specialties: text("specialties"), // Comma-separated or JSON array of specialty areas
   imageUrl: text("image_url"),
-  isActive: integer("is_active").default(1).notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
-  updatedAt: integer("updated_at")
-    
-    
-    .notNull(),
+  isActive: integer("is_active", { mode: "boolean" }).default(true).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
 }, (table) => [
   index("guide_email_idx").on(table.email),
   index("guide_isActive_idx").on(table.isActive),

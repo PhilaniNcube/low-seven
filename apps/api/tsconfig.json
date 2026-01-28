@@ -8,10 +8,11 @@
     "jsxImportSource": "hono/jsx",
     "baseUrl": ".",
     "outDir": "./dist",
+    "types": ["node", "bun"],
     "paths": {
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "api/**/*"],
+  "include": ["src/**/*", "api/**/*", "*.ts"],
   "exclude": ["node_modules"]
 }
