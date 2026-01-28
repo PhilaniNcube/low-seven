@@ -94,10 +94,12 @@ app.get("/api/debug/env", async (c) => {
 
 app
   .all("/api/auth/*", async (c) => {
+    const requestStart = Date.now();
     console.log("[Auth Handler] Incoming request:", {
       method: c.req.method,
       path: c.req.path,
       origin: c.req.header("origin"),
+      contentType: c.req.header("content-type"),
     });
     
     try {
@@ -107,21 +109,32 @@ app
       console.log("[Auth Handler] Calling auth.handler...");
       const authStartTime = Date.now();
       
-      // Add timeout to prevent hanging (15s for auth operations)
+      // Add timeout to prevent hanging (10s to match Vercel's default, but request 30s in config)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => {
+        console.error("[Auth Handler] Handler exceeded 10 second timeout");
+        console.error("[Auth Handler] This may indicate database connectivity issues");
+        console.error("[Auth Handler] Request details:", {
+          method: c.req.method,
+          path: c.req.path,
+          timeElapsed: `${Date.now() - requestStart}ms`,
+        });
+        controller.abort();
+      }, 10000);
+      
       const timeoutPromise = new Promise<Response>((_, reject) => {
-        setTimeout(() => {
-          console.error("[Auth Handler] Handler exceeded 15 second timeout");
-          console.error("[Auth Handler] This may indicate database connectivity issues or slow queries");
-          reject(new Error("Auth handler timeout after 15 seconds"));
-        }, 15000);
+        controller.signal.addEventListener('abort', () => {
+          reject(new Error("Auth handler timeout after 10 seconds"));
+        });
       });
       
-      const handlerPromise = auth.handler(c.req.raw);
+      const handlerPromise = auth.handler(c.req.raw).finally(() => clearTimeout(timeoutId));
       
       const response = await Promise.race([handlerPromise, timeoutPromise]);
       
       const authDuration = Date.now() - authStartTime;
-      console.log(`[Auth Handler] Handler completed in ${authDuration}ms`);
+      const totalDuration = Date.now() - requestStart;
+      console.log(`[Auth Handler] Handler completed in ${authDuration}ms (total: ${totalDuration}ms)`);
       
       console.log("[Auth Handler] Response:", {
         status: response.status,

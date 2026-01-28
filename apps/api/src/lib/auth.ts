@@ -49,25 +49,20 @@ export const auth = betterAuth({
   }),
   trustedOrigins,
   plugins: [openAPI()],
-  // Session configuration for better performance
+  // Session configuration - optimized for serverless
   session: {
-    // Use JWT for faster session validation (no DB query on every request)
-    strategy: "jwt",
     // Session expires after 7 days
     expiresIn: 60 * 60 * 24 * 7,
     // Update session every hour (reduces DB writes)
     updateAge: 60 * 60,
   },
-  // Add advanced options for debugging
+  // Add advanced options optimized for Vercel serverless
   advanced: {
     useSecureCookies: process.env.NODE_ENV === "production",
     generateId: () => crypto.randomUUID(),
-    // Set default timeout for operations
-    defaultCookieAttributes: {
-      sameSite: "lax",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
+    // Disable cross-subdomain cookies to improve performance
+    crossSubDomainCookies: {
+      enabled: false,
     },
   },
 });

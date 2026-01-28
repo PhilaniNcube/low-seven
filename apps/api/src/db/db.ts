@@ -16,10 +16,10 @@ if (!process.env.TURSO_AUTH_TOKEN) {
 const client = createClient({
   url: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN,
-  // Add connection timeout to prevent hanging (10 seconds)
+  // Optimize for serverless/edge environments
   intMode: "number",
-  // Set sync interval for embedded replicas (if used)
-  syncInterval: 60,
+  // Reduce sync interval for better cold start performance
+  syncInterval: 300,
 });
 
 export const db = drizzle(client, { schema, casing: 'snake_case' });
