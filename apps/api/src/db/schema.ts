@@ -1,38 +1,34 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
-  boolean,
-  decimal,
-  index,
-  integer,
-  pgEnum,
-  pgTable,
-  primaryKey,
+  sqliteTable,
   text,
-  timestamp,
-} from "drizzle-orm/pg-core";
+  integer,
+  index,
+  primaryKey,
+} from "drizzle-orm/sqlite-core";
 
-export const user = pgTable("user", {
+export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  emailVerified: boolean("email_verified").default(false).notNull(),
+  emailVerified: integer("email_verified").default(0).notNull(),
   image: text("image"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => /* @__PURE__ */ new Date())
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  updatedAt: integer("updated_at")
+    
+    
     .notNull(),
 });
 
-export const session = pgTable(
+export const session = sqliteTable(
   "session",
   {
     id: text("id").primaryKey(),
-    expiresAt: timestamp("expires_at").notNull(),
+    expiresAt: integer("expires_at").notNull(),
     token: text("token").notNull().unique(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+    createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    updatedAt: integer("updated_at")
+      
       .notNull(),
     ipAddress: text("ip_address"),
     userAgent: text("user_agent"),
@@ -43,7 +39,7 @@ export const session = pgTable(
   (table) => [index("session_userId_idx").on(table.userId)],
 );
 
-export const account = pgTable(
+export const account = sqliteTable(
   "account",
   {
     id: text("id").primaryKey(),
@@ -55,35 +51,35 @@ export const account = pgTable(
     accessToken: text("access_token"),
     refreshToken: text("refresh_token"),
     idToken: text("id_token"),
-    accessTokenExpiresAt: timestamp("access_token_expires_at"),
-    refreshTokenExpiresAt: timestamp("refresh_token_expires_at"),
+    accessTokenExpiresAt: integer("access_token_expires_at"),
+    refreshTokenExpiresAt: integer("refresh_token_expires_at"),
     scope: text("scope"),
     password: text("password"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+    createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    updatedAt: integer("updated_at")
+      
       .notNull(),
   },
   (table) => [index("account_userId_idx").on(table.userId)],
 );
 
-export const verification = pgTable(
+export const verification = sqliteTable(
   "verification",
   {
     id: text("id").primaryKey(),
     identifier: text("identifier").notNull(),
     value: text("value").notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+    expiresAt: integer("expires_at").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    updatedAt: integer("updated_at")
+      
+      
       .notNull(),
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const adminUser = pgTable(
+export const adminUser = sqliteTable(
   "admin_user",
   {
     id: text("id").primaryKey(),
@@ -93,11 +89,11 @@ export const adminUser = pgTable(
       .references(() => user.id, { onDelete: "cascade" }),
     role: text("role").default("admin").notNull(), // e.g., "admin", "super_admin", "moderator"
     permissions: text("permissions"), // JSON string for granular permissions
-    isActive: boolean("is_active").default(true).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
-      .$onUpdate(() => /* @__PURE__ */ new Date())
+    isActive: integer("is_active").default(1).notNull(),
+    createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+    updatedAt: integer("updated_at")
+      
+      
       .notNull(),
   },
   (table) => [
@@ -137,51 +133,29 @@ export const accountRelations = relations(account, ({ one }) => ({
 
 
 // --- ENUMS ---
-export const bookingStatusEnum = pgEnum("booking_status", [
-  "pending",
-  "confirmed",
-  "cancelled",
-  "completed",
-]);
 
-export const paymentStatusEnum = pgEnum("payment_status", [
-  "pending",
-  "processing",
-  "completed",
-  "failed",
-  "refunded",
-  "partially_refunded",
-]);
 
-export const paymentMethodEnum = pgEnum("payment_method", [
-  "credit_card",
-  "debit_card",
-  "paypal",
-  "bank_transfer",
-  "cash",
-  "other",
-]);
 
 // --- CATALOG TABLES ---
 
 // 1. Activities: The atomic building blocks (e.g., "Shark Diving", "Wine Tasting")
-export const activities = pgTable("activity", {
+export const activities = sqliteTable("activity", {
   id: text("id").primaryKey(), // Using text to match your Auth pattern (CUID/UUID)
   name: text("name").notNull(),
   description: text("description"),
   imageUrl: text("image_url"),
   location: text("location").notNull(),
   durationMinutes: integer("duration_minutes").notNull(), // e.g., 120 for 2 hours
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(), // Store generic catalog price
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
+  price: text("price", { precision: 10, scale: 2 }).notNull(), // Store generic catalog price
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  updatedAt: integer("updated_at")
+    
+    
     .notNull(),
 });
 
 // 1a. Activity Media: Images and videos for activities
-export const activityMedia = pgTable("activity_media", {
+export const activityMedia = sqliteTable("activity_media", {
   id: text("id").primaryKey(),
   activityId: text("activity_id")
     .notNull()
@@ -190,28 +164,28 @@ export const activityMedia = pgTable("activity_media", {
   mediaType: text("media_type").notNull(), // 'image' or 'video'
   altText: text("alt_text"),
   displayOrder: integer("display_order").default(0).notNull(), // For ordering media items
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
 }, (table) => [
   index("activity_media_activityId_idx").on(table.activityId)
 ]);
 
 // 2. Packages: The predefined bundles
-export const packages = pgTable("package", {
+export const packages = sqliteTable("package", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
   imageUrl: text("image_url"),
-  isCustom: boolean("is_custom").default(false).notNull(), // distinct bespoke templates
-  basePrice: decimal("base_price", { precision: 10, scale: 2 }), // Optional base fee
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
+  isCustom: integer("is_custom").default(0).notNull(), // distinct bespoke templates
+  basePrice: text("base_price", { precision: 10, scale: 2 }), // Optional base fee
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  updatedAt: integer("updated_at")
+    
+    
     .notNull(),
 });
 
 // 2a. Package Media: Images and videos for packages
-export const packageMedia = pgTable("package_media", {
+export const packageMedia = sqliteTable("package_media", {
   id: text("id").primaryKey(),
   packageId: text("package_id")
     .notNull()
@@ -220,13 +194,13 @@ export const packageMedia = pgTable("package_media", {
   mediaType: text("media_type").notNull(), // 'image' or 'video'
   altText: text("alt_text"),
   displayOrder: integer("display_order").default(0).notNull(), // For ordering media items
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
 }, (table) => [
   index("package_media_packageId_idx").on(table.packageId)
 ]);
 
 // 3. Package Activities: Join table for Predefined Packages (Many-to-Many)
-export const packagesToActivities = pgTable(
+export const packagesToActivities = sqliteTable(
   "package_to_activity",
   {
     packageId: text("package_id")
@@ -244,22 +218,22 @@ export const packagesToActivities = pgTable(
 // --- ORDER/BOOKING TABLES ---
 
 // 4. Bookings: The actual purchase record
-export const bookings = pgTable("booking", {
+export const bookings = sqliteTable("booking", {
   id: text("id").primaryKey(),
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }), // Link to your existing User
   packageId: text("package_id")
     .references(() => packages.id, { onDelete: "set null" }), // Nullable for purely bespoke bookings
-  status: bookingStatusEnum("status").default("pending").notNull(),
-  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
-  startDate: timestamp("start_date").notNull(),
-  endDate: timestamp("end_date").notNull(),
+  status: text("status").default("pending").notNull(),
+  totalPrice: text("total_price", { precision: 10, scale: 2 }).notNull(),
+  startDate: integer("start_date").notNull(),
+  endDate: integer("end_date").notNull(),
   specialRequests: text("special_requests"),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  updatedAt: integer("updated_at")
+    
+    
     .notNull(),
 }, (table) => [
   index("booking_user_idx").on(table.userId)
@@ -267,7 +241,7 @@ export const bookings = pgTable("booking", {
 
 // 5. Booking Activities: The specific itinerary for this booking
 // This separates the "Catalog" definition from the "Customer's actual trip"
-export const bookingActivities = pgTable("booking_activity", {
+export const bookingActivities = sqliteTable("booking_activity", {
   id: text("id").primaryKey(),
   bookingId: text("booking_id")
     .notNull()
@@ -279,14 +253,14 @@ export const bookingActivities = pgTable("booking_activity", {
     .references(() => guides.id, { onDelete: "set null" }), // Optional guide assignment
   // We snapshot the price here. If the catalog price changes later, 
   // this historic booking record remains accurate.
-  priceAtBooking: decimal("price_at_booking", { precision: 10, scale: 2 }).notNull(),
-  scheduledAt: timestamp("scheduled_at"), // Specific time for this activity
+  priceAtBooking: text("price_at_booking", { precision: 10, scale: 2 }).notNull(),
+  scheduledAt: integer("scheduled_at"), // Specific time for this activity
 }, (table) => [
   index("booking_activity_guideId_idx").on(table.guideId),
 ]);
 
 // 6. Reviews: Customer reviews and ratings for booked activities
-export const reviews = pgTable("review", {
+export const reviews = sqliteTable("review", {
   id: text("id").primaryKey(),
   bookingActivityId: text("booking_activity_id")
     .notNull()
@@ -296,11 +270,11 @@ export const reviews = pgTable("review", {
     .references(() => user.id, { onDelete: "cascade" }),
   rating: integer("rating").notNull(), // 1-5 stars
   comment: text("comment"),
-  isVerified: boolean("is_verified").default(true).notNull(), // Verified purchase
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
+  isVerified: integer("is_verified").default(1).notNull(), // Verified purchase
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  updatedAt: integer("updated_at")
+    
+    
     .notNull(),
 }, (table) => [
   index("review_bookingActivityId_idx").on(table.bookingActivityId),
@@ -308,23 +282,23 @@ export const reviews = pgTable("review", {
 ]);
 
 // 7. Payments: Track payment transactions for bookings
-export const payments = pgTable("payment", {
+export const payments = sqliteTable("payment", {
   id: text("id").primaryKey(),
   bookingId: text("booking_id")
     .notNull()
     .references(() => bookings.id, { onDelete: "cascade" }),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  amount: text("amount", { precision: 10, scale: 2 }).notNull(),
   currency: text("currency").default("USD").notNull(), // ISO 4217 currency code
-  paymentMethod: paymentMethodEnum("payment_method").notNull(),
-  paymentStatus: paymentStatusEnum("payment_status").default("pending").notNull(),
+  paymentMethod: text("payment_method").notNull(),
+  paymentStatus: text("status").default("pending").notNull(),
   transactionId: text("transaction_id"), // External payment provider transaction ID
   paymentProvider: text("payment_provider"), // e.g., 'stripe', 'paypal', 'square'
   paymentIntentId: text("payment_intent_id"), // For providers like Stripe
   metadata: text("metadata"), // JSON string for additional payment data
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  updatedAt: integer("updated_at")
+    
+    
     .notNull(),
 }, (table) => [
   index("payment_bookingId_idx").on(table.bookingId),
@@ -333,7 +307,7 @@ export const payments = pgTable("payment", {
 ]);
 
 // 8. Guides: Tour guides and staff who lead activities
-export const guides = pgTable("guide", {
+export const guides = sqliteTable("guide", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -341,11 +315,11 @@ export const guides = pgTable("guide", {
   bio: text("bio"),
   specialties: text("specialties"), // Comma-separated or JSON array of specialty areas
   imageUrl: text("image_url"),
-  isActive: boolean("is_active").default(true).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date())
+  isActive: integer("is_active").default(1).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).default(sql`(unixepoch())`).notNull(),
+  updatedAt: integer("updated_at")
+    
+    
     .notNull(),
 }, (table) => [
   index("guide_email_idx").on(table.email),

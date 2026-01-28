@@ -1,18 +1,25 @@
-import { drizzle } from 'drizzle-orm/neon-http';
-import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/libsql';
+import { createClient } from '@libsql/client';
 import * as schema from './schema';
 
-console.log("[Database] Configuring connection...");
-console.log("[Database] Has DATABASE_URL:", !!process.env.DATABASE_URL);
-console.log("[Database] Using Neon HTTP driver for Vercel compatibility");
+console.log("[Database] Configuring Turso connection...");
+console.log("[Database] Has TURSO_DATABASE_URL:", !!process.env.TURSO_DATABASE_URL);
+console.log("[Database] Has TURSO_AUTH_TOKEN:", !!process.env.TURSO_AUTH_TOKEN);
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL is required");
+if (!process.env.TURSO_DATABASE_URL) {
+  throw new Error("TURSO_DATABASE_URL is required");
 }
 
-// Use Neon HTTP driver - more reliable on Vercel than WebSocket
-const sql = neon(process.env.DATABASE_URL);
+if (!process.env.TURSO_AUTH_TOKEN) {
+  throw new Error("TURSO_AUTH_TOKEN is required");
+}
 
-export const db = drizzle(sql, { schema, casing: 'snake_case' });
+// Create Turso client - optimized for edge/serverless
+const client = createClient({
+  url: process.env.TURSO_DATABASE_URL,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
 
-console.log("[Database] Database configured with HTTP driver");
+export const db = drizzle(client, { schema, casing: 'snake_case' });
+
+console.log("[Database] Turso database configured successfully");
