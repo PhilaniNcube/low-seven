@@ -49,10 +49,26 @@ export const auth = betterAuth({
   }),
   trustedOrigins,
   plugins: [openAPI()],
+  // Session configuration for better performance
+  session: {
+    // Use JWT for faster session validation (no DB query on every request)
+    strategy: "jwt",
+    // Session expires after 7 days
+    expiresIn: 60 * 60 * 24 * 7,
+    // Update session every hour (reduces DB writes)
+    updateAge: 60 * 60,
+  },
   // Add advanced options for debugging
   advanced: {
     useSecureCookies: process.env.NODE_ENV === "production",
     generateId: () => crypto.randomUUID(),
+    // Set default timeout for operations
+    defaultCookieAttributes: {
+      sameSite: "lax",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+    },
   },
 });
 

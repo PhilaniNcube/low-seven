@@ -101,22 +101,27 @@ app
     });
     
     try {
-      // Test database connection first
-      console.log("[Auth Handler] Testing database connection...");
-      const dbTestStart = Date.now();
-      await db.run(sql`SELECT 1`);
-      console.log("[Auth Handler] Database connected in", Date.now() - dbTestStart, "ms");
+      // Skip DB test for auth routes - Better Auth will handle DB connections
+      // Testing DB connection here can add unnecessary latency
       
       console.log("[Auth Handler] Calling auth.handler...");
+      const authStartTime = Date.now();
       
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Auth handler timeout after 25 seconds")), 25000);
+      // Add timeout to prevent hanging (15s for auth operations)
+      const timeoutPromise = new Promise<Response>((_, reject) => {
+        setTimeout(() => {
+          console.error("[Auth Handler] Handler exceeded 15 second timeout");
+          console.error("[Auth Handler] This may indicate database connectivity issues or slow queries");
+          reject(new Error("Auth handler timeout after 15 seconds"));
+        }, 15000);
       });
       
       const handlerPromise = auth.handler(c.req.raw);
       
-      const response = await Promise.race([handlerPromise, timeoutPromise]) as Response;
+      const response = await Promise.race([handlerPromise, timeoutPromise]);
+      
+      const authDuration = Date.now() - authStartTime;
+      console.log(`[Auth Handler] Handler completed in ${authDuration}ms`);
       
       console.log("[Auth Handler] Response:", {
         status: response.status,
@@ -146,11 +151,17 @@ app
       console.error("[Auth Handler] Error:", error);
       console.error("[Auth Handler] Error stack:", error instanceof Error ? error.stack : 'No stack');
       
+      // Check if it's a timeout error
+      const isTimeout = error instanceof Error && error.message.includes("timeout");
+      
       // Return error response with CORS headers
       const errorResponse = c.json({ 
-        error: "Authentication error", 
-        details: error instanceof Error ? error.message : String(error)
-      }, 500);
+        error: isTimeout ? "Authentication request timeout" : "Authentication error",
+        details: error instanceof Error ? error.message : String(error),
+        suggestion: isTimeout 
+          ? "Database connection may be slow or unavailable. Check TURSO_DATABASE_URL and TURSO_AUTH_TOKEN."
+          : "Please try again or contact support if the issue persists."
+      }, isTimeout ? 504 : 500); // 504 Gateway Timeout for timeout errors
       
       const origin = c.req.header("origin");
       if (origin && allowedOrigins.includes(origin)) {
