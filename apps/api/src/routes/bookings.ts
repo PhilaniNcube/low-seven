@@ -95,7 +95,7 @@ app.get("/", requireAuth, async (c) => {
 
     // Get total count for pagination metadata
     const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)` })
       .from(bookings)
       .where(whereClause);
 
@@ -105,7 +105,7 @@ app.get("/", requireAuth, async (c) => {
     const bookingsWithDetails = await Promise.all(
       bookingsData.map(async (booking) => {
         const [activityCountResult] = await db
-          .select({ count: sql<number>`count(*)::int` })
+          .select({ count: sql<number>`count(*)` })
           .from(bookingActivities)
           .where(eq(bookingActivities.bookingId, booking.id));
 
@@ -575,9 +575,9 @@ app.post("/", requireAuth, async (c) => {
       userId: user.id,
       packageId: packageId || null,
       status: "pending",
-      totalPrice: totalPrice.toFixed(2),
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
+      totalPrice: Number.parseFloat(totalPrice.toFixed(2)),
+      startDate: new Date(startDate).getTime(),
+      endDate: new Date(endDate).getTime(),
       specialRequests: specialRequests || null,
     });
 
@@ -587,7 +587,7 @@ app.post("/", requireAuth, async (c) => {
       bookingId: bookingId,
       activityId: activity.id,
       priceAtBooking: activity.price, // Snapshot the current price
-      scheduledAt: scheduledTimes?.[activity.id] ? new Date(scheduledTimes[activity.id]) : null,
+      scheduledAt: scheduledTimes?.[activity.id] ? new Date(scheduledTimes[activity.id]).getTime() : null,
       guideId: null,
     }));
 
@@ -707,10 +707,10 @@ app.patch("/:id", requireAuth, async (c) => {
     };
 
     if (validation.data.startDate) {
-      updateData.startDate = new Date(validation.data.startDate);
+      updateData.startDate = new Date(validation.data.startDate).getTime();
     }
     if (validation.data.endDate) {
-      updateData.endDate = new Date(validation.data.endDate);
+      updateData.endDate = new Date(validation.data.endDate).getTime();
     }
     if (validation.data.specialRequests !== undefined) {
       updateData.specialRequests = validation.data.specialRequests;
@@ -968,7 +968,7 @@ app.post("/:id/activities", requireAuth, async (c) => {
       bookingId: bookingId,
       activityId: activityId,
       priceAtBooking: activity.price, // Snapshot current price
-      scheduledAt: scheduledAt ? new Date(scheduledAt) : null,
+      scheduledAt: scheduledAt ? new Date(scheduledAt).getTime() : null,
       guideId: null,
     });
 
@@ -977,7 +977,7 @@ app.post("/:id/activities", requireAuth, async (c) => {
     await db
       .update(bookings)
       .set({
-        totalPrice: newTotalPrice.toFixed(2),
+        totalPrice: Number.parseFloat(newTotalPrice.toFixed(2)),
         updatedAt: new Date(),
       })
       .where(eq(bookings.id, bookingId));
@@ -1101,7 +1101,7 @@ app.patch("/:id/activities/:activityId", requireAuth, async (c) => {
     const updateData: any = {};
 
     if (validation.data.scheduledAt) {
-      updateData.scheduledAt = new Date(validation.data.scheduledAt);
+      updateData.scheduledAt = new Date(validation.data.scheduledAt).getTime();
     }
 
     // Update the booking activity
@@ -1364,13 +1364,13 @@ app.get("/:id/payments", requireAdmin, async (c) => {
     const totalPaid = paymentsData.reduce((sum, payment) => {
       // Only count successful payments
       if (payment.paymentStatus === "completed") {
-        return sum + parseFloat(payment.amount);
+        return sum + Number(payment.amount);
       }
       return sum;
     }, 0);
 
     // Calculate remaining amount
-    const bookingTotal = parseFloat(booking.totalPrice);
+    const bookingTotal = Number(booking.totalPrice);
     const remainingAmount = bookingTotal - totalPaid;
 
     // Return payment details with summary

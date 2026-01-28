@@ -44,14 +44,14 @@ app.get("/", async (c) => {
     if (minPrice) {
       const minPriceNum = Number.parseFloat(minPrice);
       if (!Number.isNaN(minPriceNum)) {
-        conditions.push(gte(activities.price, minPrice));
+        conditions.push(gte(activities.price, minPriceNum));
       }
     }
 
     if (maxPrice) {
       const maxPriceNum = Number.parseFloat(maxPrice);
       if (!Number.isNaN(maxPriceNum)) {
-        conditions.push(lte(activities.price, maxPrice));
+        conditions.push(lte(activities.price, maxPriceNum));
       }
     }
 
@@ -72,7 +72,7 @@ app.get("/", async (c) => {
 
     // Get total count for pagination metadata
     const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)` })
       .from(activities)
       .where(whereClause);
 
@@ -134,7 +134,7 @@ app.post("/", requireAdmin, zValidator("json", createActivitySchema), async (c) 
         imageUrl: body.imageUrl?.trim() || null,
         location: body.location.trim(),
         durationMinutes: body.durationMinutes,
-        price: body.price.toFixed(2),
+        price: body.price,
       })
       .returning();
 
@@ -216,7 +216,7 @@ app.patch("/:id", requireAdmin, zValidator("json", updateActivitySchema), async 
       updateData.durationMinutes = body.durationMinutes;
     }
     if (body.price !== undefined) {
-      updateData.price = body.price.toFixed(2);
+      updateData.price = Number.parseFloat(body.price.toFixed(2));
     }
 
     // Update activity
@@ -638,7 +638,7 @@ app.get("/:id/reviews", async (c) => {
 
     // Get total count of reviews for pagination
     const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)` })
       .from(reviews)
       .innerJoin(bookingActivities, eq(reviews.bookingActivityId, bookingActivities.id))
       .where(eq(bookingActivities.activityId, activityId));

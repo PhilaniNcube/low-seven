@@ -159,7 +159,7 @@ app.post("/", requireAuth, zValidator("json", createPaymentSchema), async (c) =>
     await db.insert(payments).values({
       id: paymentId,
       bookingId: bookingId,
-      amount: paymentAmount.toString(),
+      amount: paymentAmount,
       currency: currency,
       paymentMethod: paymentMethod,
       paymentStatus: "pending",
@@ -632,7 +632,7 @@ app.post("/:id/refund", requireAuth, zValidator("json", processRefundSchema), as
     }
 
     // Determine refund amount (use full payment amount if not specified)
-    const paymentAmountNum = Number(payment.amount);
+    const paymentAmountNum = payment.amount;
     const refundAmountNum = refundAmount ?? paymentAmountNum;
 
     // Validate refund amount
@@ -981,7 +981,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     // Calculate total paid amount
     const totalPaid = bookingPayments
       .filter(p => p.paymentStatus === "completed")
-      .reduce((sum, p) => sum + Number(p.amount), 0);
+      .reduce((sum, p) => sum + p.amount, 0);
 
     // Get booking total
     const bookingData = await db
@@ -1125,7 +1125,7 @@ async function handleRefund(charge: Stripe.Charge) {
     }
 
     const payment = paymentData[0];
-    const paymentAmount = Number(payment.amount);
+    const paymentAmount = payment.amount;
     const refundedAmount = charge.amount_refunded / 100; // Convert from cents
 
     // Determine if full or partial refund

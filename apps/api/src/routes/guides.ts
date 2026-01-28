@@ -79,7 +79,7 @@ app.get("/", async (c) => {
 
     // Get total count for pagination
     const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)` })
       .from(guides)
       .where(whereClause);
 
@@ -248,8 +248,8 @@ app.get("/:id/availability", async (c) => {
       .where(
         and(
           eq(bookingActivities.guideId, guideId),
-          gte(bookingActivities.scheduledAt, start),
-          lte(bookingActivities.scheduledAt, end)
+          gte(bookingActivities.scheduledAt, start.getTime()),
+          lte(bookingActivities.scheduledAt, end.getTime())
         )
       )
       .orderBy(bookingActivities.scheduledAt);
@@ -380,7 +380,7 @@ app.get("/:id/reviews", async (c) => {
 
     // Get total count of reviews for pagination
     const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)` })
       .from(reviews)
       .innerJoin(bookingActivities, eq(reviews.bookingActivityId, bookingActivities.id))
       .where(eq(bookingActivities.guideId, guideId));

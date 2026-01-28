@@ -153,7 +153,7 @@ export const packages = sqliteTable("package", {
   name: text("name").notNull(),
   description: text("description").notNull(),
   imageUrl: text("image_url"),
-  isCustom: integer("is_custom").default(0).notNull(), // distinct bespoke templates
+  isCustom: integer("is_custom", { mode: "boolean" }).default(false).notNull(), // distinct bespoke templates
   basePrice: real("base_price"), // Optional base fee
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
@@ -242,7 +242,7 @@ export const reviews = sqliteTable("review", {
     .references(() => user.id, { onDelete: "cascade" }),
   rating: integer("rating").notNull(), // 1-5 stars
   comment: text("comment"),
-  isVerified: integer("is_verified").default(1).notNull(), // Verified purchase
+  isVerified: integer("is_verified", { mode: "boolean" }).default(true).notNull(), // Verified purchase
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()).notNull(),
   updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(() => new Date()).notNull(),
 }, (table) => [

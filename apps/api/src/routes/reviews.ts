@@ -69,7 +69,7 @@ app.get("/", async (c) => {
 
     // Get total count for pagination metadata
     const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)` })
       .from(reviews);
 
     const totalPages = Math.ceil(count / limit);
@@ -170,7 +170,7 @@ app.get("/me", requireAuth, async (c) => {
 
     // Get total count for pagination metadata
     const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)` })
       .from(reviews)
       .where(eq(reviews.userId, authUser.id));
 

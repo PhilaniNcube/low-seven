@@ -40,7 +40,7 @@ app.get("/", async (c) => {
         basePrice: packages.basePrice,
         createdAt: packages.createdAt,
         updatedAt: packages.updatedAt,
-        activityCount: sql<number>`count(DISTINCT ${packagesToActivities.activityId})::int`,
+        activityCount: sql<number>`count(DISTINCT ${packagesToActivities.activityId})`,
       })
       .from(packages)
       .leftJoin(packagesToActivities, eq(packages.id, packagesToActivities.packageId))
@@ -51,7 +51,7 @@ app.get("/", async (c) => {
 
     // Get total count for pagination metadata
     const [{ count }] = await db
-      .select({ count: sql<number>`count(*)::int` })
+      .select({ count: sql<number>`count(*)` })
       .from(packages);
 
     const totalPages = Math.ceil(count / limit);
@@ -270,7 +270,7 @@ app.post("/", requireAdmin, zValidator("json", createPackageSchema), async (c) =
         description: body.description,
         imageUrl: body.imageUrl,
         isCustom: body.isCustom,
-        basePrice: body.basePrice?.toString(),
+        basePrice: body.basePrice,
       })
       .returning();
 
@@ -324,7 +324,7 @@ app.patch("/:id", requireAdmin, zValidator("json", updatePackageSchema), async (
     if (body.description !== undefined) updateData.description = body.description;
     if (body.imageUrl !== undefined) updateData.imageUrl = body.imageUrl;
     if (body.isCustom !== undefined) updateData.isCustom = body.isCustom;
-    if (body.basePrice !== undefined) updateData.basePrice = body.basePrice?.toString();
+    if (body.basePrice !== undefined) updateData.basePrice = body.basePrice;
 
     const [updatedPackage] = await db
       .update(packages)
