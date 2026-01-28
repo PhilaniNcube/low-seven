@@ -94,7 +94,27 @@ app.get("/api/debug/env", async (c) => {
 
 app
   .all("/api/auth/*", async (c) => {
+    console.log("[Auth Handler] Incoming request:", {
+      method: c.req.method,
+      path: c.req.path,
+      origin: c.req.header("origin"),
+    });
+    
     const response = await auth.handler(c.req.raw);
+    
+    console.log("[Auth Handler] Response:", {
+      status: response.status,
+      statusText: response.statusText,
+      headers: Object.fromEntries(response.headers.entries()),
+    });
+    
+    // Clone to log body
+    const cloned = response.clone();
+    cloned.text().then(text => {
+      console.log("[Auth Handler] Response body:", text);
+    }).catch(err => {
+      console.error("[Auth Handler] Error reading response:", err);
+    });
     
     // Manually add CORS headers to auth responses since Better Auth bypasses Hono middleware
     const origin = c.req.header("origin");

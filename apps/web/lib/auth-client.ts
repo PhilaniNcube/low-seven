@@ -14,8 +14,10 @@ if (!apiUrl) {
 // Increase timeout and add better error handling
 export const authClient = createAuthClient({
   baseURL: apiUrl || "http://localhost:3000",
+  
   fetchOptions: {
     credentials: "include",
+    
     // Custom fetch with timeout and better error handling
     onRequest: async (context) => {
       console.log("[Auth Client] Making request to:", context.url);
@@ -23,6 +25,25 @@ export const authClient = createAuthClient({
     onSuccess: async (context) => {
       console.log("[Auth Client] Request successful:", context.response.status);
       console.log("[Auth Client] Response headers:", Object.fromEntries(context.response.headers.entries()));
+      
+      // Clone response to read body without consuming it
+      const clonedResponse = context.response.clone();
+      try {
+        const text = await clonedResponse.text();
+        console.log("[Auth Client] Response body:", text);
+        if (text) {
+          try {
+            const json = JSON.parse(text);
+            console.log("[Auth Client] Parsed JSON:", json);
+          } catch (e) {
+            console.log("[Auth Client] Response is not JSON");
+          }
+        } else {
+          console.log("[Auth Client] Response body is empty");
+        }
+      } catch (e) {
+        console.error("[Auth Client] Error reading response:", e);
+      }
     },
     onError: async (context) => {
       console.error("[Auth Client] Request failed:", {
