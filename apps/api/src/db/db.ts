@@ -21,7 +21,7 @@ export const pool = new Pool({
   max: 1, // Limit connections in serverless
 });
 
-pool.on('error', (err) => {
+pool.on('error', (err: Error) => {
   console.error('[Database] Unexpected pool error:', err);
 });
 
