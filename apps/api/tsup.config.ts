@@ -11,7 +11,6 @@ export default defineConfig({
   splitting: false,
   treeshake: true,
   platform: 'node',
-  noExternal: [/.*/],
   external: [
     '@libsql/client',
     '@libsql/darwin-arm64',
