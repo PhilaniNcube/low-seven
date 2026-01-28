@@ -11,3 +11,4 @@ api/*.map
 .env.local
 .env.*.local
 todos.md
+.vercel
