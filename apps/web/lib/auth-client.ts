@@ -7,14 +7,14 @@ if (!apiUrl) {
     "⚠️ NEXT_PUBLIC_API_URL is not set. Falling back to localhost:3000. " +
     "This will cause issues in production. Please set NEXT_PUBLIC_API_URL in your environment variables."
   );
+} else {
+  console.log("[Auth Client] Using API URL:", apiUrl);
 }
 
 export const authClient = createAuthClient({
   baseURL: apiUrl || "http://localhost:3000",
   fetchOptions: {
     credentials: "include",
-    // Add a timeout to prevent hanging requests
-    signal: AbortSignal.timeout(25000), // 25 second timeout
   },
 });
 

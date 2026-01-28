@@ -11,6 +11,12 @@ const trustedOrigins = process.env.TRUSTED_ORIGINS?.split(",") || [
   "http://localhost:3000",
 ];
 
+console.log("[Auth] Initializing with trusted origins:", trustedOrigins);
+
+if (!process.env.DATABASE_URL) {
+  console.error("[Auth] DATABASE_URL is not set!");
+}
+
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,

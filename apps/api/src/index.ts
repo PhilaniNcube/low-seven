@@ -7,6 +7,8 @@ import bookingsRoute from "./routes/bookings";
 import paymentsRoute from "./routes/payments";
 import reviewsRoute from "./routes/reviews";
 import guidesRoute from "./routes/guides";
+import { db } from "./db/db";
+import { sql } from "drizzle-orm";
 
 const app = new Hono();
 
@@ -25,6 +27,51 @@ app.use(
     allowHeaders: ["Content-Type", "Authorization"],
   }),
 );
+
+// Health check endpoint - no auth required
+app.get("/api/health", async (c) => {
+  const startTime = Date.now();
+  
+  try {
+    // Test database connection
+    await db.execute(sql`SELECT 1`);
+    const dbResponseTime = Date.now() - startTime;
+    
+    return c.json({
+      status: "healthy",
+      timestamp: new Date().toISOString(),
+      database: {
+        status: "connected",
+        responseTime: `${dbResponseTime}ms`
+      },
+      environment: {
+        hasDbUrl: !!process.env.DATABASE_URL,
+        hasCorsOrigins: !!process.env.CORS_ORIGINS,
+        hasTrustedOrigins: !!process.env.TRUSTED_ORIGINS,
+        corsOrigins: process.env.CORS_ORIGINS?.split(",").length || 0,
+        trustedOrigins: process.env.TRUSTED_ORIGINS?.split(",").length || 0,
+      }
+    });
+  } catch (error) {
+    const dbResponseTime = Date.now() - startTime;
+    console.error("[Health Check] Database error:", error);
+    
+    return c.json({
+      status: "unhealthy",
+      timestamp: new Date().toISOString(),
+      database: {
+        status: "error",
+        responseTime: `${dbResponseTime}ms`,
+        error: error instanceof Error ? error.message : "Unknown error"
+      },
+      environment: {
+        hasDbUrl: !!process.env.DATABASE_URL,
+        hasCorsOrigins: !!process.env.CORS_ORIGINS,
+        hasTrustedOrigins: !!process.env.TRUSTED_ORIGINS,
+      }
+    }, 500);
+  }
+});
 
 app
   .all("/api/auth/*", async (c) => {

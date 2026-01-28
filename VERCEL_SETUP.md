@@ -101,6 +101,74 @@ TRUSTED_ORIGINS=https://your-exact-web-url.vercel.app
 - Ensure `TRUSTED_ORIGINS` includes exact URL user sees in browser
 - Include all variations (with/without www) if applicable
 
+### Issue: "Signal timeout" or "Request timeout" errors (No CORS errors)
+
+This typically indicates the API is reachable but taking too long to respond, often due to database connection issues in serverless environments.
+
+**Possible Causes:**
+1. ❌ Database connection timing out
+2. ❌ Cold start taking too long
+3. ❌ `DATABASE_URL` not set or incorrect
+4. ❌ Database not accessible from Vercel (IP restrictions, network issues)
+
+**Solutions:**
+
+1. **Check Database URL**: Verify `DATABASE_URL` is set correctly in API environment variables
+   ```env
+   # Should look like this (for Neon)
+   DATABASE_URL=postgresql://user:password@ep-xxx-xxx.region.aws.neon.tech/dbname?sslmode=require
+   ```
+
+2. **Check Vercel Function Logs**:
+   - Go to your API project in Vercel
+   - Click on "Deployments" → Select latest deployment
+   - Click "Functions" → View function logs
+   - Look for database connection errors or timeout messages
+
+3. **Verify Database Provider Settings**:
+   - For Neon: Ensure "Enable connection pooling" is enabled
+   - Check if there are IP restrictions blocking Vercel
+   - Verify SSL mode is correct (`?sslmode=require` for Neon)
+
+4. **Test Database Connection**:
+   Add a simple health check endpoint to test:
+   ```typescript
+   // In apps/api/src/index.ts
+   app.get("/api/health", async (c) => {
+     try {
+       await db.execute(sql`SELECT 1`);
+       return c.json({ status: "ok", database: "connected" });
+     } catch (error) {
+       return c.json({ 
+         status: "error", 
+         database: "failed",
+         error: error.message 
+       }, 500);
+     }
+   });
+   ```
+
+5. **Check for Missing Dependencies**:
+   - Ensure `ws` package is installed: `bun add ws`
+   - Ensure `@types/ws` is installed: `bun add -d @types/ws`
+   - These are required for Neon's WebSocket connections in serverless
+
+6. **Increase Function Timeout** (if on paid plan):
+   - Go to API project → Settings → Functions
+   - Increase "Max Duration" to 15-20 seconds
+   - Note: Free tier is limited to 10 seconds
+
+**Quick Check Commands:**
+```bash
+# Test API health endpoint
+curl https://your-api-url.vercel.app/api/health
+
+# Test auth endpoint
+curl https://your-api-url.vercel.app/api/auth/reference
+```
+- Ensure `TRUSTED_ORIGINS` includes exact URL user sees in browser
+- Include all variations (with/without www) if applicable
+
 ## 📝 Setup Checklist
 
 ### Web App Setup:

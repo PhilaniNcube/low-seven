@@ -25,10 +25,12 @@
     "hono": "^4.11.4",
     "nanoid": "^5.1.6",
     "stripe": "^20.2.0",
+    "ws": "^8.19.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/ws": "^8.18.1",
     "drizzle-kit": "^0.31.8",
     "open-cli": "^8.0.0",
     "tsc-alias": "^1.8.16",
