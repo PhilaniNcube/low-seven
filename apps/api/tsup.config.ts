@@ -8,6 +8,8 @@ export default defineConfig({
   clean: true,
   bundle: true,
   minify: false,
-  noExternal: [/(.*)/],
-  external: [],
+  splitting: false,
+  treeshake: true,
+  platform: 'node',
+  shims: true,
 })
