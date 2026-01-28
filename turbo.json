@@ -29,7 +29,15 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"],
       "env": [
-        "NEXT_PUBLIC_API_URL"
+        "NEXT_PUBLIC_API_URL",
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTERAUTH_URL",
+        "CORS_ORIGINS",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_PUBLISHABLE_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "TRUSTED_ORIGINS"
       ]
     },
     "lint": {
