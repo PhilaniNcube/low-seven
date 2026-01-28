@@ -8,7 +8,6 @@ export default defineConfig({
   clean: true,
   bundle: true,
   minify: false,
-  external: [
-    '@neondatabase/serverless'
-  ],
+  noExternal: [/(.*)/],
+  external: [],
 })
