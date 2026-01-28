@@ -13,7 +13,11 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
-  trustedOrigins: ['http://localhost:3001', 'http://localhost:3000'],
+  trustedOrigins: [
+    'http://localhost:3001', 
+    'http://localhost:3000',
+    'https://low-seven-web.vercel.app'
+  ],
   plugins: [
     openAPI()
   ],

@@ -11,7 +11,11 @@ import guidesRoute from './routes/guides'
 const app = new Hono()
 
 // CORS middleware - must be before routes
-const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || ['http://localhost:3001', 'http://localhost:3000']
+const allowedOrigins = process.env.CORS_ORIGINS?.split(',') || [
+  'http://localhost:3001', 
+  'http://localhost:3000',
+  'https://low-seven-web.vercel.app'
+]
 
 app.use('*', cors({
   origin: allowedOrigins,
