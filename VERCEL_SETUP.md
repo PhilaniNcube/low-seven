@@ -151,7 +151,7 @@ This typically indicates the API is reachable but taking too long to respond, of
 5. **Check for Missing Dependencies**:
    - Ensure `ws` package is installed: `bun add ws`
    - Ensure `@types/ws` is installed: `bun add -d @types/ws`
-   - These are required for Neon's WebSocket connections in serverless
+   - These are required for Neon's WebSocket connections in serverless.
 
 6. **Increase Function Timeout** (if on paid plan):
    - Go to API project → Settings → Functions
