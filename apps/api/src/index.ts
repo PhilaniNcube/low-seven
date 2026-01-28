@@ -73,6 +73,25 @@ app.get("/api/health", async (c) => {
   }
 });
 
+// Debug endpoint to check environment variables (REMOVE IN PRODUCTION!)
+app.get("/api/debug/env", async (c) => {
+  return c.json({
+    corsOrigins: {
+      raw: process.env.CORS_ORIGINS,
+      parsed: process.env.CORS_ORIGINS?.split(",") || [],
+      count: process.env.CORS_ORIGINS?.split(",").length || 0,
+    },
+    trustedOrigins: {
+      raw: process.env.TRUSTED_ORIGINS,
+      parsed: process.env.TRUSTED_ORIGINS?.split(",") || [],
+      count: process.env.TRUSTED_ORIGINS?.split(",").length || 0,
+    },
+    hasDbUrl: !!process.env.DATABASE_URL,
+    requestOrigin: c.req.header("origin") || "no origin header",
+    allowedInCors: allowedOrigins,
+  });
+});
+
 app
   .all("/api/auth/*", async (c) => {
     return await auth.handler(c.req.raw);

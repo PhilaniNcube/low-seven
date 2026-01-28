@@ -19,15 +19,16 @@ export const authClient = createAuthClient({
     // Custom fetch with timeout and better error handling
     onRequest: async (context) => {
       console.log("[Auth Client] Making request to:", context.url);
-      return context;
     },
     onSuccess: async (context) => {
       console.log("[Auth Client] Request successful:", context.response.status);
+      console.log("[Auth Client] Response headers:", Object.fromEntries(context.response.headers.entries()));
     },
     onError: async (context) => {
       console.error("[Auth Client] Request failed:", {
         error: context.error,
-        response: context.response
+        response: context.response,
+        status: context.response?.status,
       });
     },
   },

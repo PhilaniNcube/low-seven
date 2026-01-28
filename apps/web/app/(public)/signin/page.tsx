@@ -55,17 +55,29 @@ export default function SignInPage() {
           setAuthError(
             "Connection timeout. Please check your internet connection and try again."
           );
+          console.error("[Sign In] Timeout after 30 seconds");
         }, 30000); // 30 second timeout
 
         try {
-          await signIn.email(
+          console.log("[Sign In] Starting authentication...");
+          console.log("[Sign In] Email:", state.data!.email);
+          
+          // Test API connectivity first
+          const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+          console.log("[Sign In] Testing API connectivity to:", apiUrl);
+          
+          const result = await signIn.email(
             {
               email: state.data!.email,
               password: state.data!.password,
             },
             {
+              onRequest: (ctx) => {
+                console.log("[Sign In] onRequest called", ctx);
+              },
               onError: (ctx) => {
                 clearTimeout(timeoutId);
+                console.error("[Sign In] onError called:", ctx);
                 const errorMessage = ctx.error.message || "Failed to sign in";
                 
                 // Provide more helpful error messages
@@ -81,12 +93,21 @@ export default function SignInPage() {
               },
               onSuccess: () => {
                 clearTimeout(timeoutId);
+                console.log("[Sign In] onSuccess called");
               },
             }
           );
+          
+          console.log("[Sign In] Result:", result);
         } catch (error) {
           clearTimeout(timeoutId);
+          console.error("[Sign In] Caught error:", error);
           if (error instanceof Error) {
+            console.error("[Sign In] Error details:", {
+              name: error.name,
+              message: error.message,
+              stack: error.stack,
+            });
             if (error.name === "AbortError" || error.message.includes("timeout")) {
               setAuthError(
                 "Request timeout. The server took too long to respond. Please try again."
@@ -99,6 +120,7 @@ export default function SignInPage() {
               setAuthError(error.message || "An unexpected error occurred");
             }
           } else {
+            console.error("[Sign In] Non-Error object caught:", error);
             setAuthError("An unexpected error occurred. Please try again.");
           }
         }
