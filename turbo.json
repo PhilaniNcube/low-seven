@@ -22,7 +22,9 @@
         "STRIPE_SECRET_KEY",
         "STRIPE_PUBLISHABLE_KEY",
         "STRIPE_WEBHOOK_SECRET",
-        "TRUSTED_ORIGINS"
+        "TRUSTED_ORIGINS",
+        "TURSO_DATABASE_URL",
+        "TURSO_AUTH_TOKEN"
       ]
     },
     "web#build": {
@@ -37,7 +39,9 @@
         "STRIPE_SECRET_KEY",
         "STRIPE_PUBLISHABLE_KEY",
         "STRIPE_WEBHOOK_SECRET",
-        "TRUSTED_ORIGINS"
+        "TRUSTED_ORIGINS",
+        "TURSO_DATABASE_URL",
+        "TURSO_AUTH_TOKEN"
       ]
     },
     "lint": {
