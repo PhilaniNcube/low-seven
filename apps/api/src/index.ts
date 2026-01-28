@@ -109,10 +109,10 @@ app
       console.log("[Auth Handler] Calling auth.handler...");
       const authStartTime = Date.now();
       
-      // Add timeout to prevent hanging (10s to match Vercel's default, but request 30s in config)
+      // Add timeout to prevent hanging (20s - gives room within Vercel's 30s limit)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => {
-        console.error("[Auth Handler] Handler exceeded 10 second timeout");
+        console.error("[Auth Handler] Handler exceeded 20 second timeout");
         console.error("[Auth Handler] This may indicate database connectivity issues");
         console.error("[Auth Handler] Request details:", {
           method: c.req.method,
@@ -120,11 +120,11 @@ app
           timeElapsed: `${Date.now() - requestStart}ms`,
         });
         controller.abort();
-      }, 10000);
+      }, 20000);
       
       const timeoutPromise = new Promise<Response>((_, reject) => {
         controller.signal.addEventListener('abort', () => {
-          reject(new Error("Auth handler timeout after 10 seconds"));
+          reject(new Error("Auth handler timeout after 20 seconds"));
         });
       });
       

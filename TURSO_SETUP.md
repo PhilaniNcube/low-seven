@@ -94,11 +94,43 @@ After setting environment variables in Vercel:
 
 ## Troubleshooting
 
-**If sign-in still fails:**
-1. Check Vercel logs for `[Database]` messages
-2. Verify both `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` are set
-3. Make sure migrations ran successfully
-4. Check that database URL starts with `libsql://`
+**If sign-in still fails with timeouts:**
+
+1. **Check database region** - The database might be too far from Vercel servers:
+```bash
+turso db show low-seven-db
+```
+Look for the "Location" field. If it's not close to your Vercel region (typically `us-east`), create a replica:
+
+```bash
+# List available regions
+turso db regions
+
+# Create a replica in a region closer to Vercel (e.g., us-east)
+turso db replicate low-seven-db --region iad  # iad = us-east (Virginia)
+```
+
+2. **Verify environment variables** in Vercel:
+   - Check `TURSO_DATABASE_URL` is set correctly
+   - Check `TURSO_AUTH_TOKEN` is valid
+   - Ensure variables are set for Production environment
+
+3. **Check Vercel logs** for detailed error messages:
+   - Look for `[Auth Handler]` and `[Database]` messages
+   - Check if timeout is before or after database connection
+
+4. **Verify migrations ran successfully:**
+```bash
+turso db shell low-seven-db
+
+# Then run:
+.tables
+```
+
+**If still having issues:**
+1. Verify database URL starts with `libsql://`
+2. Regenerate auth token if it's expired
+3. Check Vercel function logs for specific errors
 
 **Useful Turso Commands:**
 ```bash
