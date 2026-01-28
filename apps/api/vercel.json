@@ -1,6 +1,12 @@
 {
   "buildCommand": "cd ../.. && turbo run build --filter=api",
   "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "functions": {
+    "dist/index.cjs": {
+      "includeFiles": "node_modules/@libsql/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
