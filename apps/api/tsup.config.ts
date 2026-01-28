@@ -12,4 +12,5 @@ export default defineConfig({
   treeshake: true,
   platform: 'node',
   shims: true,
+  noExternal: [/.*/],
 })
