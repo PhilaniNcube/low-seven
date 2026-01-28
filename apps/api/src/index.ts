@@ -100,32 +100,52 @@ app
       origin: c.req.header("origin"),
     });
     
-    const response = await auth.handler(c.req.raw);
-    
-    console.log("[Auth Handler] Response:", {
-      status: response.status,
-      statusText: response.statusText,
-      headers: Object.fromEntries(response.headers.entries()),
-    });
-    
-    // Clone to log body
-    const cloned = response.clone();
-    cloned.text().then(text => {
-      console.log("[Auth Handler] Response body:", text);
-    }).catch(err => {
-      console.error("[Auth Handler] Error reading response:", err);
-    });
-    
-    // Manually add CORS headers to auth responses since Better Auth bypasses Hono middleware
-    const origin = c.req.header("origin");
-    if (origin && allowedOrigins.includes(origin)) {
-      response.headers.set("Access-Control-Allow-Origin", origin);
-      response.headers.set("Access-Control-Allow-Credentials", "true");
-      response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-      response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    try {
+      console.log("[Auth Handler] Calling auth.handler...");
+      const response = await auth.handler(c.req.raw);
+      
+      console.log("[Auth Handler] Response:", {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries()),
+      });
+      
+      // Clone to log body
+      const cloned = response.clone();
+      cloned.text().then(text => {
+        console.log("[Auth Handler] Response body:", text);
+      }).catch(err => {
+        console.error("[Auth Handler] Error reading response:", err);
+      });
+      
+      // Manually add CORS headers to auth responses since Better Auth bypasses Hono middleware
+      const origin = c.req.header("origin");
+      if (origin && allowedOrigins.includes(origin)) {
+        response.headers.set("Access-Control-Allow-Origin", origin);
+        response.headers.set("Access-Control-Allow-Credentials", "true");
+        response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+      }
+      
+      return response;
+    } catch (error) {
+      console.error("[Auth Handler] Error:", error);
+      console.error("[Auth Handler] Error stack:", error instanceof Error ? error.stack : 'No stack');
+      
+      // Return error response with CORS headers
+      const errorResponse = c.json({ 
+        error: "Authentication error", 
+        details: error instanceof Error ? error.message : String(error)
+      }, 500);
+      
+      const origin = c.req.header("origin");
+      if (origin && allowedOrigins.includes(origin)) {
+        errorResponse.headers.set("Access-Control-Allow-Origin", origin);
+        errorResponse.headers.set("Access-Control-Allow-Credentials", "true");
+      }
+      
+      return errorResponse;
     }
-    
-    return response;
   })
   .route("/api/webhooks", paymentsRoute) // Webhook routes (no auth)
   .route("/api/activities", activitiesRoute)

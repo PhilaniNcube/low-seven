@@ -15,15 +15,23 @@ console.log("[Auth] Initializing with trusted origins:", trustedOrigins);
 
 if (!process.env.DATABASE_URL) {
   console.error("[Auth] DATABASE_URL is not set!");
+} else {
+  console.log("[Auth] DATABASE_URL is set");
 }
 
 if (!process.env.BETTER_AUTH_SECRET) {
   console.warn("[Auth] BETTER_AUTH_SECRET is not set! Using fallback for development.");
+} else {
+  console.log("[Auth] BETTER_AUTH_SECRET is set");
 }
 
 if (!process.env.BETTERAUTH_URL) {
   console.warn("[Auth] BETTERAUTH_URL is not set! This is required for production.");
+} else {
+  console.log("[Auth] BETTERAUTH_URL is set to:", process.env.BETTERAUTH_URL);
 }
+
+console.log("[Auth] Creating Better Auth instance...");
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET || "fallback-secret-for-development-only-change-in-production",
@@ -37,6 +45,8 @@ export const auth = betterAuth({
   trustedOrigins,
   plugins: [openAPI()],
 });
+
+console.log("[Auth] Better Auth instance created successfully");
 
 /**
  * Check if a user is an active admin
